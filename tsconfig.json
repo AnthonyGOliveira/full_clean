@@ -1,12 +1,15 @@
 {
-    "compilerOptions": {
-      "outDir": "./dist",
-      "module": "CommonJS",
-      "target": "ES2019",
-      "esModuleInterop": true,
-      "allowJs": true
-    },
-    "include": ["src/**/*.ts"],  // Ajuste para o seu caminho de código-fonte
-    "exclude": ["node_modules"]
-  }
-  
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "CommonJS",
+    "target": "ES2019",
+    "esModuleInterop": true,
+    "allowJs": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ], // Ajuste para o seu caminho de código-fonte
+  "exclude": [
+    "node_modules",
+  ]
+}
