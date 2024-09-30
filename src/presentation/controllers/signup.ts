@@ -4,9 +4,7 @@ export class SignUpController {
     if (!name) {
       return {
         statusCode: 400,
-        body: {
-          message: "Name is required",
-        },
+        body: new Error('Missing param: name'),
       };
     }
 
