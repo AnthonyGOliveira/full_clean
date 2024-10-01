@@ -28,4 +28,17 @@ describe("SignUp Controller", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body).toEqual(new MissingParam("email"));
   });
+  test("Should return 400 if password is not provided", async () => {
+    const sut = new SignUpController();
+    const httpRequest = {
+      body: {
+        name: "any_name",
+        email: "any_email",
+        confirmationPassword: "any_password",
+      },
+    };
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body).toEqual(new MissingParam("password"));
+  });
 });
