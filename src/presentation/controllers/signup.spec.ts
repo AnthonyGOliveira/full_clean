@@ -99,7 +99,7 @@ describe("SignUp Controller", () => {
     expect(httpResponse.body).toEqual(new InvalidParam("email"));
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
   });
-  test("Should email validator called with correct value", async () => {
+  test("Should return 200 email validator called with correct value", async () => {
     const { sut, emailValidator } = makeSut();
     const httpRequest = {
       body: {
@@ -140,5 +140,19 @@ describe("SignUp Controller", () => {
     expect(httpResponse.body).toEqual(new ServerError());
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
     expect(spyLoggerError).toHaveBeenCalledWith(new Error('Error'));
+  });
+  test("Should return 400 if confirmationPassword is not equal password", async () => {
+    const { sut } = makeSut();
+    const httpRequest = {
+      body: {
+        name: "any_name",
+        email: "any_email",
+        password: "any_password",
+        confirmationPassword: "another_password"
+      },
+    };
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body).toEqual(new InvalidParam("confirmationPassword"));
   });
 });
