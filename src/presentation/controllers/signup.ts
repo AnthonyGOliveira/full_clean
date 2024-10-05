@@ -30,6 +30,12 @@ export class SignUpController implements Controller {
       if (!this.emailValidator.isValid(httpRequest.body.email)) {
         return badRequest(new InvalidParam("email"));
       }
+
+      if (
+        httpRequest.body["password"] != httpRequest.body["confirmationPassword"]
+      ) {
+        return badRequest(new InvalidParam("confirmationPassword"));
+      }
       return {
         statusCode: 200,
         body: {
@@ -37,8 +43,8 @@ export class SignUpController implements Controller {
         },
       };
     } catch (error) {
-      this.logger.error(error)
-      return serverError()
+      this.logger.error(error);
+      return serverError();
     }
   }
 }
