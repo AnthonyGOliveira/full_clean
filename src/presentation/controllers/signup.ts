@@ -1,6 +1,7 @@
+import { AddAcountUseCase } from "../../domain/usecases/AddAcountUseCase";
 import { InvalidParam } from "../errors/invalid-param-error";
 import { MissingParam } from "../errors/missing-param-error";
-import { badRequest, serverError } from "../helpers/http-helpers";
+import { badRequest, ok, serverError } from "../helpers/http-helpers";
 import { Controller } from "../protocols/controller";
 import { EmailValidator } from "../protocols/email-validator";
 import { HttpRequest, HttpResponse } from "../protocols/http";
@@ -9,9 +10,15 @@ import { Logger } from "../protocols/logger";
 export class SignUpController implements Controller {
   emailValidator: EmailValidator;
   logger: Logger;
-  constructor(emailValidator: EmailValidator, logger: Logger) {
+  addAcountUseCase: AddAcountUseCase;
+  constructor(
+    emailValidator: EmailValidator,
+    logger: Logger,
+    addAcountUseCase: AddAcountUseCase
+  ) {
     this.emailValidator = emailValidator;
     this.logger = logger;
+    this.addAcountUseCase = addAcountUseCase;
   }
 
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
@@ -27,21 +34,21 @@ export class SignUpController implements Controller {
           return badRequest(new MissingParam(field));
         }
       }
-      if (!this.emailValidator.isValid(httpRequest.body.email)) {
-        return badRequest(new InvalidParam("email"));
-      }
-
-      if (
-        httpRequest.body["password"] != httpRequest.body["confirmationPassword"]
-      ) {
+      const { email, password, confirmationPassword, name } = httpRequest.body;
+      if (password != confirmationPassword) {
         return badRequest(new InvalidParam("confirmationPassword"));
       }
-      return {
-        statusCode: 200,
-        body: {
-          message: "Signup is successfull",
-        },
+      if (!this.emailValidator.isValid(email)) {
+        return badRequest(new InvalidParam("email"));
+      }
+      const addAcount = {
+        name: name,
+        email: email,
+        password: password,
       };
+      const result = await this.addAcountUseCase.execute(addAcount);
+
+      return ok(result);
     } catch (error) {
       this.logger.error(error);
       return serverError();
