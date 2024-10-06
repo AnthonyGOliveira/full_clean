@@ -1,3 +1,8 @@
+import { AddAcountModel } from "../../domain/models/AddAcountModel";
+import {
+  AddAcount,
+  AddAcountUseCase,
+} from "../../domain/usecases/AddAcountUseCase";
 import { InvalidParam } from "../errors/invalid-param-error";
 import { MissingParam } from "../errors/missing-param-error";
 import { ServerError } from "../errors/server-error";
@@ -5,7 +10,14 @@ import { EmailValidator } from "../protocols/email-validator";
 import { Logger } from "../protocols/logger";
 import { SignUpController } from "./signup";
 
-const makeSut = () => {
+interface makeSutInterface {
+  sut: SignUpController;
+  emailValidator: EmailValidator;
+  logger: Logger;
+  useCase: AddAcountUseCase;
+}
+
+const makeSut = (): makeSutInterface => {
   class EmailValidatorStub implements EmailValidator {
     isValid(email: string): boolean {
       return true;
@@ -13,18 +25,33 @@ const makeSut = () => {
   }
 
   class LoggerStub implements Logger {
-    info():void {};
-    debug():void {};
-    warning():void {};
-    error():void {};
+    info(): void {}
+    debug(): void {}
+    warning(): void {}
+    error(): void {}
+  }
+
+  class AddAcountUseCaseStub implements AddAcountUseCase {
+    async execute(addAcount: AddAcount): Promise<AddAcountModel> {
+      return new Promise((resolve, reject) =>
+        resolve({
+          id: "valid_id",
+          name: addAcount.name,
+          email: addAcount.email,
+          password: addAcount.password,
+        })
+      );
+    }
   }
   const emailValidator = new EmailValidatorStub();
   const logger = new LoggerStub();
-  const sut = new SignUpController(emailValidator, logger);
+  const useCase = new AddAcountUseCaseStub();
+  const sut = new SignUpController(emailValidator, logger, useCase);
   return {
     sut,
     emailValidator,
     logger,
+    useCase,
   };
 };
 
@@ -112,11 +139,15 @@ describe("SignUp Controller", () => {
     const emailValidatorSpy = jest
       .spyOn(emailValidator, "isValid")
       .mockReturnValueOnce(true);
+    const expectedResponse: AddAcountModel = {
+      id: "valid_id",
+      name: "any_name",
+      email: "any_email",
+      password: "any_password",
+    };
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(200);
-    expect(httpResponse.body).toEqual({
-      message: "Signup is successfull",
-    });
+    expect(httpResponse.body).toEqual(expectedResponse);
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
   });
   test("Should return 500 if internal server error occurred", async () => {
@@ -139,7 +170,7 @@ describe("SignUp Controller", () => {
     expect(httpResponse.statusCode).toBe(500);
     expect(httpResponse.body).toEqual(new ServerError());
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
-    expect(spyLoggerError).toHaveBeenCalledWith(new Error('Error'));
+    expect(spyLoggerError).toHaveBeenCalledWith(new Error("Error"));
   });
   test("Should return 400 if confirmationPassword is not equal password", async () => {
     const { sut } = makeSut();
@@ -148,11 +179,71 @@ describe("SignUp Controller", () => {
         name: "any_name",
         email: "any_email",
         password: "any_password",
-        confirmationPassword: "another_password"
+        confirmationPassword: "another_password",
       },
     };
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body).toEqual(new InvalidParam("confirmationPassword"));
+  });
+  test("Should return 500 if internal server error occurred in AddAcountUseCase", async () => {
+    const { sut, logger, useCase } = makeSut();
+    const httpRequest = {
+      body: {
+        name: "any_name",
+        email: "any_email",
+        password: "any_password",
+        confirmationPassword: "any_password",
+      },
+    };
+    const expectedCall: AddAcount = {
+      name: "any_name",
+      email: "any_email",
+      password: "any_password",
+    };
+    const useCaseSpy = jest
+      .spyOn(useCase, "execute")
+      .mockImplementationOnce(() => {
+        throw new Error("Error");
+      });
+    const spyLoggerError = jest.spyOn(logger, "error");
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse.statusCode).toBe(500);
+    expect(httpResponse.body).toEqual(new ServerError());
+    expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
+    expect(spyLoggerError).toHaveBeenCalledWith(new Error("Error"));
+  });
+  test("Should return 200 if AddAcountUseCase executed with success", async () => {
+    const { sut, emailValidator, logger, useCase } = makeSut();
+    const httpRequest = {
+      body: {
+        name: "any_name",
+        email: "any_email",
+        password: "any_password",
+        confirmationPassword: "any_password",
+      },
+    };
+    const expectedCall: AddAcount = {
+      name: "any_name",
+      email: "any_email",
+      password: "any_password",
+    };
+    const expectedResponse: AddAcountModel = {
+      id: "valid_id",
+      name: "any_name",
+      email: "any_email",
+      password: "any_password",
+    };
+
+    const useCaseSpy = jest.spyOn(useCase, "execute");
+    const emailValidatorSpy = jest.spyOn(emailValidator, "isValid");
+
+    const spyLoggerError = jest.spyOn(logger, "error");
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse.statusCode).toBe(200);
+    expect(httpResponse.body).toEqual(expectedResponse);
+    expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
+    expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
+    expect(spyLoggerError).not.toHaveBeenCalledWith(new Error("Error"));
   });
 });
