@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.13",
     "@types/node": "^22.5.5",
+    "@types/validator": "^13.12.2",
     "eslint": "^8.57.1",
     "eslint-config-love": "^71.0.0",
     "git-commit-msg-linter": "^5.0.8",
@@ -25,5 +26,8 @@
     "lint-staged": "^15.2.10",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "validator": "^13.12.0"
   }
 }
