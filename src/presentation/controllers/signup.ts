@@ -1,4 +1,4 @@
-import { AddAcountUseCase } from "../../domain/usecases/AddAcountUseCase";
+import { AddAcountUseCase } from "../../domain/usecases/add-acount-use-case";
 import { InvalidParam } from "../errors/invalid-param-error";
 import { MissingParam } from "../errors/missing-param-error";
 import { badRequest, ok, serverError } from "../helpers/http-helpers";

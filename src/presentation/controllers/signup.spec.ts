@@ -1,8 +1,8 @@
-import { AddAcountModel } from "../../domain/models/AddAcountModel";
+import { AddAcountModel } from "../../domain/models/add-acount-model";
 import {
   AddAcount,
   AddAcountUseCase,
-} from "../../domain/usecases/AddAcountUseCase";
+} from "../../domain/usecases/add-acount-use-case";
 import { InvalidParam } from "../errors/invalid-param-error";
 import { MissingParam } from "../errors/missing-param-error";
 import { ServerError } from "../errors/server-error";
