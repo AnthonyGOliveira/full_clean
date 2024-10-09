@@ -1,10 +1,15 @@
-import { resolve } from "path";
 import { Encrypter } from "../protocols/encrypter";
 import { DbAddAcountUseCase } from "./db-add-acount-use-case";
+import {
+  AddAcount,
+  AddAcountRepository,
+} from "../protocols/add-acount-repository";
+import { AddAcountModel } from "../models/add-acount-model";
 
 interface TypeSut {
   sut: DbAddAcountUseCase;
   encrypted: Encrypter;
+  repository: AddAcountRepository;
 }
 
 const makeSut = (): TypeSut => {
@@ -13,12 +18,25 @@ const makeSut = (): TypeSut => {
       return new Promise((resolve) => resolve("hashed_password"));
     }
   }
+  class AddAcountRepositoryStub implements AddAcountRepository {
+    async add(addAcount: AddAcount): Promise<AddAcountModel> {
+      const addAcountModel = {
+        id: "valid_id",
+        name: addAcount.name,
+        email: addAcount.email,
+        password: addAcount.password,
+      };
+      return new Promise((resolve) => resolve(addAcountModel));
+    }
+  }
   const encryptedStub = new EncrypterStub();
-  const sut = new DbAddAcountUseCase(encryptedStub);
+  const addAcountRepository = new AddAcountRepositoryStub();
+  const sut = new DbAddAcountUseCase(encryptedStub, addAcountRepository);
 
   return {
     sut,
     encrypted: encryptedStub,
+    repository: addAcountRepository,
   };
 };
 
@@ -67,5 +85,16 @@ describe("DbAddAcountUseCase", () => {
     const promise = sut.execute(addAcount);
     expect(spyEncrypted).toHaveBeenCalledWith(addAcount.password);
     await expect(promise).rejects.toThrow();
+  });
+  test("should DbAddAccountUseCase call AddAcountRepository", async () => {
+    const { sut, repository } = makeSut();
+    const addAcount = {
+      name: "valid_name",
+      email: "valid_email@mail.com",
+      password: "hashed_password",
+    };
+    const spyRepository = jest.spyOn(repository, "add");
+    await sut.execute(addAcount);
+    expect(spyRepository).toHaveBeenCalledWith(addAcount);
   });
 });
