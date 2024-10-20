@@ -13,7 +13,7 @@ describe("AccountMongoRepository", () => {
     await MongoDatabaseHelper.connect(process.env.MONGO_URL);
   });
   afterEach(async () => {
-    const accountCollection = MongoDatabaseHelper.getCollection("accounts");
+    const accountCollection = await  MongoDatabaseHelper.getCollection("accounts");
     await accountCollection.deleteMany({});
   });
   afterAll(async () => {
