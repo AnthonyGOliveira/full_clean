@@ -5,19 +5,15 @@ import { badRequest, ok, serverError } from "../helpers/http-helpers";
 import { Controller } from "../protocols/controller";
 import { EmailValidator } from "../protocols/email-validator";
 import { HttpRequest, HttpResponse } from "../protocols/http";
-import { Logger } from "../protocols/logger";
 
 export class SignUpController implements Controller {
   emailValidator: EmailValidator;
-  logger: Logger;
   addAcountUseCase: AddAcountUseCase;
   constructor(
     emailValidator: EmailValidator,
-    logger: Logger,
     addAcountUseCase: AddAcountUseCase
   ) {
     this.emailValidator = emailValidator;
-    this.logger = logger;
     this.addAcountUseCase = addAcountUseCase;
   }
 
@@ -50,8 +46,7 @@ export class SignUpController implements Controller {
 
       return ok(result);
     } catch (error) {
-      this.logger.error(error);
-      return serverError();
+      return serverError(error);
     }
   }
 }
