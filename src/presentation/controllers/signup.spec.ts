@@ -5,7 +5,6 @@ import {
 } from "../../domain/usecases/add-acount-use-case";
 import { InvalidParam } from "../errors/invalid-param-error";
 import { MissingParam } from "../errors/missing-param-error";
-import { ServerError } from "../errors/server-error";
 import { EmailValidator } from "../protocols/email-validator";
 import { Logger } from "../protocols/logger";
 import { SignUpController } from "./signup";
@@ -46,7 +45,7 @@ const makeSut = (): makeSutInterface => {
   const emailValidator = new EmailValidatorStub();
   const logger = new LoggerStub();
   const useCase = new AddAcountUseCaseStub();
-  const sut = new SignUpController(emailValidator, logger, useCase);
+  const sut = new SignUpController(emailValidator, useCase);
   return {
     sut,
     emailValidator,
@@ -160,17 +159,21 @@ describe("SignUp Controller", () => {
         confirmationPassword: "any_password",
       },
     };
+    const error = new Error("Error");
+    error.stack = "any_stack";
     const emailValidatorSpy = jest
       .spyOn(emailValidator, "isValid")
       .mockImplementationOnce(() => {
-        throw new Error("Error");
+        throw error;
       });
     const spyLoggerError = jest.spyOn(logger, "error");
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(500);
-    expect(httpResponse.body).toEqual(new ServerError());
+    expect(httpResponse.body).toEqual({
+      message: "Internal Server Error",
+      stack: error.stack,
+    });
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
-    expect(spyLoggerError).toHaveBeenCalledWith(new Error("Error"));
   });
   test("Should return 400 if confirmationPassword is not equal password", async () => {
     const { sut } = makeSut();
@@ -201,17 +204,20 @@ describe("SignUp Controller", () => {
       email: "any_email",
       password: "any_password",
     };
+    const error = new Error("Error");
+    error.stack = "any_stack";
     const useCaseSpy = jest
       .spyOn(useCase, "execute")
       .mockImplementationOnce(() => {
-        throw new Error("Error");
+        throw error;
       });
-    const spyLoggerError = jest.spyOn(logger, "error");
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(500);
-    expect(httpResponse.body).toEqual(new ServerError());
+    expect(httpResponse.body).toEqual({
+      message: "Internal Server Error",
+      stack: error.stack,
+    });
     expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
-    expect(spyLoggerError).toHaveBeenCalledWith(new Error("Error"));
   });
   test("Should return 200 if AddAcountUseCase executed with success", async () => {
     const { sut, emailValidator, logger, useCase } = makeSut();
