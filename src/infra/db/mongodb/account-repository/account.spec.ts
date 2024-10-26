@@ -13,7 +13,9 @@ describe("AccountMongoRepository", () => {
     await MongoDatabaseHelper.connect(process.env.MONGO_URL);
   });
   afterEach(async () => {
-    const accountCollection = await  MongoDatabaseHelper.getCollection("accounts");
+    const accountCollection = await MongoDatabaseHelper.getCollection(
+      "accounts"
+    );
     await accountCollection.deleteMany({});
   });
   afterAll(async () => {
@@ -38,5 +40,20 @@ describe("AccountMongoRepository", () => {
     expect(addAcountModel.name).toBe(addAcount.name);
     expect(addAcountModel.email).toBe(addAcount.email);
     expect(addAcountModel.password).toBe(addAcount.password);
+  });
+  test("should throw an error if add throws", async () => {
+    const { sut } = makeSut();
+    const error = new Error("Database error");
+    jest
+      .spyOn(MongoDatabaseHelper, "getCollection")
+      .mockImplementationOnce(() => {
+        throw error;
+      });
+    const addAcount = {
+      name: "any_name",
+      email: "any_email@email.com",
+      password: "hashed_password",
+    };
+    await expect(sut.add(addAcount)).rejects.toThrow("Database error");
   });
 });
