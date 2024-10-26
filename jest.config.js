@@ -6,8 +6,11 @@ module.exports = {
   transform: {
     ".+\\.ts$": "ts-jest",
   },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   coveragePathIgnorePatterns: [
     "/node_modules/",
     "<rootDir>/src/infra/db/mongodb/helpers/mongodb-mocking.ts", // Ignora o arquivo específico
+    "<rootDir>/src/main/server.ts",
+    "<rootDir>/src/main/config",
   ],
 };
