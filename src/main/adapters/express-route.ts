@@ -6,6 +6,8 @@ export default (controller: Controller) => {
   return async (request: Request, response: Response, next: NextFunction) => {
     const httpRequest: HttpRequest = {
       body: request.body,
+      method: request.method,
+      url: request.url,
     };
 
     const httpResponse: HttpResponse = await controller.handle(httpRequest);
