@@ -1,12 +1,12 @@
-import { AddAcountModel } from "../../domain/models/add-acount-model";
+import { AddAcountModel } from "../../../domain/models/add-acount-model";
 import {
   AddAcount,
   AddAcountUseCase,
-} from "../../domain/usecases/add-acount-use-case";
-import { InvalidParam } from "../errors/invalid-param-error";
-import { MissingParam } from "../errors/missing-param-error";
-import { EmailValidator } from "../protocols/email-validator";
-import { Logger } from "../protocols/logger";
+} from "../../../domain/usecases/add-acount-use-case";
+import { InvalidParam } from "../../errors/invalid-param-error";
+import { MissingParam } from "../../errors/missing-param-error";
+import { EmailValidator } from "../../protocols/email-validator";
+import { Logger } from "../../protocols/logger";
 import { SignUpController } from "./signup";
 
 interface makeSutInterface {
