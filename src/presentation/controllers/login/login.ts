@@ -5,8 +5,13 @@ import { HttpRequest, HttpResponse } from "../../protocols/http";
 
 export class LoginController implements Controller {
   handle(httpRequest: HttpRequest): Promise<HttpResponse> {
-    return new Promise((resolve) =>
-      resolve(badRequest(new MissingParam("email")))
-    );
+    const validateFields = ["email", "password"];
+    for (const field of validateFields) {
+      if (!httpRequest.body[field]) {
+        return new Promise((resolve) =>
+          resolve(badRequest(new MissingParam(field)))
+        );
+      }
+    }
   }
 }
