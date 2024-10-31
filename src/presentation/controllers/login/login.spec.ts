@@ -3,6 +3,7 @@ import {
   FindAccount,
   FindAccountUseCase,
 } from "../../../domain/usecases/find-account-use-case";
+import { InvalidParam } from "../../errors/invalid-param-error";
 import { MissingParam } from "../../errors/missing-param-error";
 import { EmailValidator } from "../../protocols/email-validator";
 import { LoginController } from "./login";
@@ -104,7 +105,7 @@ describe("LoginController", () => {
     expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
   });
   test("Should return 500 if internal server error occurred in EmailValidator", async () => {
-    const { sut, useCase, emailValidator } = makeSut();
+    const { sut, emailValidator } = makeSut();
     const httpRequest = {
       body: {
         email: "any_email@email.com",
@@ -126,6 +127,26 @@ describe("LoginController", () => {
       message: "Internal Server Error",
       stack: error.stack,
     });
+    expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
+  });
+  test("Should return 400 if EmailValidator return false", async () => {
+    const { sut, emailValidator } = makeSut();
+    const httpRequest = {
+      body: {
+        email: "any_email@email.com",
+        password: "any_password",
+      },
+    };
+    const error = new Error("Error");
+    error.stack = "any_stack";
+
+    const emailValidatorSpy = jest
+      .spyOn(emailValidator, "isValid")
+      .mockReturnValueOnce(false);
+
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body).toEqual(new InvalidParam("email or password"));
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
   });
   test("Should return 200 if FindAccountUseCase executed with success", async () => {
