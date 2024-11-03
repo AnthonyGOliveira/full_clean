@@ -2,6 +2,7 @@ import { AddAcountUseCase } from "../../../domain/usecases/add-acount-use-case";
 import { InvalidParam } from "../../errors/invalid-param-error";
 import { MissingParam } from "../../errors/missing-param-error";
 import { badRequest, ok, serverError } from "../../helpers/http-helpers";
+import { Validation } from "../../helpers/validators/validation";
 import { Controller } from "../../protocols/controller";
 import { EmailValidator } from "../../protocols/email-validator";
 import { HttpRequest, HttpResponse } from "../../protocols/http";
@@ -9,16 +10,20 @@ import { HttpRequest, HttpResponse } from "../../protocols/http";
 export class SignUpController implements Controller {
   emailValidator: EmailValidator;
   addAcountUseCase: AddAcountUseCase;
+  validation: Validation;
   constructor(
     emailValidator: EmailValidator,
-    addAcountUseCase: AddAcountUseCase
+    addAcountUseCase: AddAcountUseCase,
+    validation: Validation
   ) {
     this.emailValidator = emailValidator;
     this.addAcountUseCase = addAcountUseCase;
+    this.validation = validation;
   }
 
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
+      this.validation.validate(httpRequest.body);
       const validateFields = [
         "name",
         "email",
