@@ -5,6 +5,7 @@ import {
 } from "../../../domain/usecases/add-acount-use-case";
 import { InvalidParam } from "../../errors/invalid-param-error";
 import { MissingParam } from "../../errors/missing-param-error";
+import { badRequest } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { EmailValidator } from "../../protocols/email-validator";
 import { Logger } from "../../protocols/logger";
@@ -24,7 +25,7 @@ const makeValidationCompositeStub = (): Validation => {
       return null;
     }
   }
-  return new ValidationCompositeStub()
+  return new ValidationCompositeStub();
 };
 
 const makeSut = (): makeSutInterface => {
@@ -53,7 +54,7 @@ const makeSut = (): makeSutInterface => {
       );
     }
   }
-  const validationStub = makeValidationCompositeStub()
+  const validationStub = makeValidationCompositeStub();
   const emailValidator = new EmailValidatorStub();
   const logger = new LoggerStub();
   const useCase = new AddAcountUseCaseStub();
@@ -63,7 +64,7 @@ const makeSut = (): makeSutInterface => {
     emailValidator,
     logger,
     useCase,
-    validation: validationStub
+    validation: validationStub,
   };
 };
 
@@ -279,5 +280,23 @@ describe("SignUp Controller", () => {
     const validationSpy = jest.spyOn(validation, "validate");
     await sut.handle(httpRequest);
     expect(validationSpy).toHaveBeenCalledWith(httpRequest.body);
+  });
+  test("Should return 400 if validation return an error", async () => {
+    const { sut, validation } = makeSut();
+    const httpRequest = {
+      body: {
+        name: "any_name",
+        email: "any_email",
+        password: "any_password",
+        confirmationPassword: "any_password",
+      },
+    };
+    const error = new MissingParam("any_param");
+    const validationSpy = jest
+      .spyOn(validation, "validate")
+      .mockReturnValueOnce(error);
+    const httpResponse = await sut.handle(httpRequest);
+    expect(validationSpy).toHaveBeenCalledWith(httpRequest.body);
+    expect(httpResponse).toEqual(badRequest(error));
   });
 });
