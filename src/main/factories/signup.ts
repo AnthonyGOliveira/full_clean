@@ -6,10 +6,12 @@ import { SignUpController } from "../../presentation/controllers/signup/signup";
 import { Controller } from "../../presentation/protocols/controller";
 import { EmailValidatorAdapter } from "../../utils/email-validator-adapter";
 import LoggerFactory from "./logger";
+import ValidationCompositeFactory from "./validation-composite/validation-composite";
 
 export default (): Controller => {
   const emailValidator = new EmailValidatorAdapter();
   const encrypter = new BCryptAdapter();
+  const validationComposite = ValidationCompositeFactory();
   const accountMongoRepository = new AccountMongoRepository();
   const addAcountUseCase = new DbAddAcountUseCase(
     encrypter,
@@ -17,7 +19,8 @@ export default (): Controller => {
   );
   const signUpController = new SignUpController(
     emailValidator,
-    addAcountUseCase
+    addAcountUseCase,
+    validationComposite
   );
   const logger = LoggerFactory();
   return new LogControllerDecorator(signUpController, logger);
