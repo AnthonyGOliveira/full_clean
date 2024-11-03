@@ -1,16 +1,18 @@
-import { AddAcountModel } from "../../../domain/models/add-acount-model";
 import {
   FindAccount,
-  FindAccountUseCase,
-} from "../../../domain/usecases/find-account-use-case";
+  AuthenticationUseCase,
+  AuthResponse,
+} from "../../../domain/usecases/authentication-use-case";
 import { InvalidParam } from "../../errors/invalid-param-error";
 import { MissingParam } from "../../errors/missing-param-error";
+import { Unauthorized } from "../../errors/unauthorized-error";
+import { unauthorizedRequest } from "../../helpers/http-helpers";
 import { EmailValidator } from "../../protocols/email-validator";
 import { LoginController } from "./login";
 
 interface typeSut {
   sut: LoginController;
-  useCase: FindAccountUseCase;
+  useCase: AuthenticationUseCase;
   emailValidator: EmailValidator;
 }
 
@@ -24,20 +26,18 @@ const makeEmailValdiatorStub = (): EmailValidator => {
   return new EmailValidatorStub();
 };
 
-const makeUseCaseStub = (): FindAccountUseCase => {
-  const addAcountMock: AddAcountModel = {
-    id: "any_id",
-    name: "any_name",
-    email: "any_email",
-    password: "hashed_password",
+const makeUseCaseStub = (): AuthenticationUseCase => {
+  const authResponseMock: AuthResponse = {
+    accessToken: "any_access_token",
+    expiresIn: 3600,
   };
-  class FindAccountUseCaseStub implements FindAccountUseCase {
-    execute(addAcount: FindAccount): Promise<AddAcountModel> {
-      return new Promise((resolve) => resolve(addAcountMock));
+  class AuthenticationUseCaseStub implements AuthenticationUseCase {
+    execute(addAcount: FindAccount): Promise<AuthResponse | null> {
+      return new Promise((resolve) => resolve(authResponseMock));
     }
   }
 
-  return new FindAccountUseCaseStub();
+  return new AuthenticationUseCaseStub();
 };
 
 const makeSut = (): typeSut => {
@@ -74,7 +74,29 @@ describe("LoginController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body).toEqual(new MissingParam("password"));
   });
-  test("Should return 500 if internal server error occurred in FindAccountUseCase", async () => {
+  test("Should return 401 if AuthenticationUseCase not return AuthenticationResponse", async () => {
+    const { sut, useCase } = makeSut();
+    const httpRequest = {
+      body: {
+        email: "any_email@email.com",
+        password: "any_password",
+      },
+    };
+
+    const useCaseSpy = jest
+      .spyOn(useCase, "execute")
+      .mockImplementationOnce(() => null);
+
+    const expectedCall: FindAccount = {
+      email: httpRequest.body.email,
+      password: httpRequest.body.password,
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse).toEqual(unauthorizedRequest(new Unauthorized()))
+    expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
+  });
+  test("Should return 500 if internal server error occurred in AuthenticationUseCase", async () => {
     const { sut, useCase } = makeSut();
     const httpRequest = {
       body: {
@@ -149,7 +171,7 @@ describe("LoginController", () => {
     expect(httpResponse.body).toEqual(new InvalidParam("email or password"));
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
   });
-  test("Should return 200 if FindAccountUseCase executed with success", async () => {
+  test("Should return 200 if AuthenticationUseCase executed with success", async () => {
     const { sut, useCase } = makeSut();
     const httpRequest = {
       body: {
@@ -165,11 +187,9 @@ describe("LoginController", () => {
       password: httpRequest.body.password,
     };
 
-    const expectedResponse: AddAcountModel = {
-      id: "any_id",
-      name: "any_name",
-      email: "any_email",
-      password: "hashed_password",
+    const expectedResponse: AuthResponse = {
+      accessToken: "any_access_token",
+      expiresIn: 3600,
     };
 
     const httpResponse = await sut.handle(httpRequest);
