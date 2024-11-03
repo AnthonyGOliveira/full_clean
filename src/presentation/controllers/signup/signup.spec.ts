@@ -5,6 +5,7 @@ import {
 } from "../../../domain/usecases/add-acount-use-case";
 import { InvalidParam } from "../../errors/invalid-param-error";
 import { MissingParam } from "../../errors/missing-param-error";
+import { Validation } from "../../helpers/validators/validation";
 import { EmailValidator } from "../../protocols/email-validator";
 import { Logger } from "../../protocols/logger";
 import { SignUpController } from "./signup";
@@ -14,7 +15,17 @@ interface makeSutInterface {
   emailValidator: EmailValidator;
   logger: Logger;
   useCase: AddAcountUseCase;
+  validation: Validation;
 }
+
+const makeValidationCompositeStub = (): Validation => {
+  class ValidationCompositeStub implements Validation {
+    validate(input: any): Error | null {
+      return null;
+    }
+  }
+  return new ValidationCompositeStub()
+};
 
 const makeSut = (): makeSutInterface => {
   class EmailValidatorStub implements EmailValidator {
@@ -42,15 +53,17 @@ const makeSut = (): makeSutInterface => {
       );
     }
   }
+  const validationStub = makeValidationCompositeStub()
   const emailValidator = new EmailValidatorStub();
   const logger = new LoggerStub();
   const useCase = new AddAcountUseCaseStub();
-  const sut = new SignUpController(emailValidator, useCase);
+  const sut = new SignUpController(emailValidator, useCase, validationStub);
   return {
     sut,
     emailValidator,
     logger,
     useCase,
+    validation: validationStub
   };
 };
 
@@ -251,5 +264,20 @@ describe("SignUp Controller", () => {
     expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
     expect(spyLoggerError).not.toHaveBeenCalledWith(new Error("Error"));
+  });
+
+  test("Should call validation when SignUpController is called", async () => {
+    const { sut, validation } = makeSut();
+    const httpRequest = {
+      body: {
+        name: "any_name",
+        email: "any_email",
+        password: "any_password",
+        confirmationPassword: "any_password",
+      },
+    };
+    const validationSpy = jest.spyOn(validation, "validate");
+    await sut.handle(httpRequest);
+    expect(validationSpy).toHaveBeenCalledWith(httpRequest.body);
   });
 });
