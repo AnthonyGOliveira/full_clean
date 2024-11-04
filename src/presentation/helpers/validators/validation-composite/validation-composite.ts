@@ -1,4 +1,4 @@
-import { Validation } from "./validation";
+import { Validation } from "../validation";
 
 export class ValidationComposite implements Validation {
   private readonly validations: Validation[];
@@ -12,5 +12,6 @@ export class ValidationComposite implements Validation {
         return error;
       }
     }
+    return null;
   }
 }
