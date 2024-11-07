@@ -27,17 +27,6 @@ export class SignUpController implements Controller {
       if (validationError) {
         return badRequest(validationError);
       }
-      const validateFields = [
-        "name",
-        "email",
-        "password",
-        "confirmationPassword",
-      ];
-      for (const field of validateFields) {
-        if (!httpRequest.body[field]) {
-          return badRequest(new MissingParam(field));
-        }
-      }
       const { email, password, confirmationPassword, name } = httpRequest.body;
       if (password != confirmationPassword) {
         return badRequest(new InvalidParam("confirmationPassword"));
