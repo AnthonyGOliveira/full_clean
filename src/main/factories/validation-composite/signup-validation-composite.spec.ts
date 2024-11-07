@@ -1,8 +1,11 @@
+import { CompareFieldsValidation } from "../../../presentation/helpers/validators/compare-fields-validation/compare-fields-validation";
 import { RequiredFieldValidation } from "../../../presentation/helpers/validators/required-field-validation/required-field-validation";
 import { ValidationComposite } from "../../../presentation/helpers/validators/validation-composite/validation-composite";
 import SignupValidationCompositeFactory from "./signup-validation-composite";
 
-jest.mock("../../../presentation/helpers/validators/validation-composite/validation-composite");
+jest.mock(
+  "../../../presentation/helpers/validators/validation-composite/validation-composite"
+);
 
 const makeSut = () => {
   const validationComposite = SignupValidationCompositeFactory();
@@ -19,6 +22,7 @@ describe("ValidationComposite", () => {
       new RequiredFieldValidation("email"),
       new RequiredFieldValidation("password"),
       new RequiredFieldValidation("confirmationPassword"),
+      new CompareFieldsValidation("password", "confirmationPassword"),
     ];
     expect(ValidationComposite).toHaveBeenCalledWith(validations);
   });
