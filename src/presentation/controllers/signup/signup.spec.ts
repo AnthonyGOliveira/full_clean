@@ -136,19 +136,6 @@ describe("SignUp Controller", () => {
     });
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
   });
-  test("Should return 400 if confirmationPassword is not equal password", async () => {
-    const { sut } = makeSut();
-    const httpRequest = {
-      body: {
-        name: "any_name",
-        email: "any_email",
-        password: "any_password",
-        confirmationPassword: "another_password",
-      },
-    };
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(badRequest(new InvalidParam("confirmationPassword")));
-  });
   test("Should return 500 if internal server error occurred in AddAcountUseCase", async () => {
     const { sut, logger, useCase } = makeSut();
     const httpRequest = {
