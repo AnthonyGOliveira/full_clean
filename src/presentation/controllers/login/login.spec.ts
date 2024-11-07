@@ -6,7 +6,7 @@ import {
 import { InvalidParam } from "../../errors/invalid-param-error";
 import { MissingParam } from "../../errors/missing-param-error";
 import { Unauthorized } from "../../errors/unauthorized-error";
-import { unauthorizedRequest } from "../../helpers/http-helpers";
+import { badRequest, unauthorizedRequest } from "../../helpers/http-helpers";
 import { EmailValidator } from "../../protocols/email-validator";
 import { LoginController } from "./login";
 
@@ -60,8 +60,7 @@ describe("LoginController", () => {
       },
     };
     const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body).toEqual(new MissingParam("email"));
+    expect(httpResponse).toEqual(badRequest(new MissingParam("email")));
   });
   test("Should return 400 if request if not send password", async () => {
     const { sut } = makeSut();
@@ -71,8 +70,7 @@ describe("LoginController", () => {
       },
     };
     const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body).toEqual(new MissingParam("password"));
+    expect(httpResponse).toEqual(badRequest(new MissingParam("password")));
   });
   test("Should return 401 if AuthenticationUseCase not return AuthenticationResponse", async () => {
     const { sut, useCase } = makeSut();
@@ -93,7 +91,7 @@ describe("LoginController", () => {
     };
 
     const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(unauthorizedRequest(new Unauthorized()))
+    expect(httpResponse).toEqual(unauthorizedRequest(new Unauthorized()));
     expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
   });
   test("Should return 500 if internal server error occurred in AuthenticationUseCase", async () => {
@@ -167,8 +165,9 @@ describe("LoginController", () => {
       .mockReturnValueOnce(false);
 
     const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body).toEqual(new InvalidParam("email or password"));
+    expect(httpResponse).toEqual(
+      badRequest(new InvalidParam("email or password"))
+    );
     expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
   });
   test("Should return 200 if AuthenticationUseCase executed with success", async () => {
