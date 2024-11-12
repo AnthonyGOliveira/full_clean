@@ -13,7 +13,6 @@ import { SignUpController } from "./signup";
 
 interface makeSutInterface {
   sut: SignUpController;
-  emailValidator: EmailValidator;
   logger: Logger;
   useCase: AddAcountUseCase;
   validation: Validation;
@@ -55,13 +54,11 @@ const makeSut = (): makeSutInterface => {
     }
   }
   const validationStub = makeValidationCompositeStub();
-  const emailValidator = new EmailValidatorStub();
   const logger = new LoggerStub();
   const useCase = new AddAcountUseCaseStub();
-  const sut = new SignUpController(emailValidator, useCase, validationStub);
+  const sut = new SignUpController(useCase, validationStub);
   return {
     sut,
-    emailValidator,
     logger,
     useCase,
     validation: validationStub,
@@ -69,25 +66,8 @@ const makeSut = (): makeSutInterface => {
 };
 
 describe("SignUp Controller", () => {
-  test("Should return 400 if email is not valid", async () => {
-    const { sut, emailValidator } = makeSut();
-    const httpRequest = {
-      body: {
-        name: "any_name",
-        email: "any_email",
-        password: "any_password",
-        confirmationPassword: "any_password",
-      },
-    };
-    const emailValidatorSpy = jest
-      .spyOn(emailValidator, "isValid")
-      .mockReturnValueOnce(false);
-    const httpResponse = await sut.handle(httpRequest);
-    expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
-    expect(httpResponse).toEqual(badRequest(new InvalidParam("email")));
-  });
   test("Should return 200 email validator called with correct value", async () => {
-    const { sut, emailValidator } = makeSut();
+    const { sut } = makeSut();
     const httpRequest = {
       body: {
         name: "any_name",
@@ -96,9 +76,6 @@ describe("SignUp Controller", () => {
         confirmationPassword: "any_password",
       },
     };
-    const emailValidatorSpy = jest
-      .spyOn(emailValidator, "isValid")
-      .mockReturnValueOnce(true);
     const expectedResponse: AddAcountModel = {
       id: "valid_id",
       name: "any_name",
@@ -108,33 +85,6 @@ describe("SignUp Controller", () => {
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(200);
     expect(httpResponse.body).toEqual(expectedResponse);
-    expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
-  });
-  test("Should return 500 if internal server error occurred", async () => {
-    const { sut, emailValidator, logger } = makeSut();
-    const httpRequest = {
-      body: {
-        name: "any_name",
-        email: "any_email",
-        password: "any_password",
-        confirmationPassword: "any_password",
-      },
-    };
-    const error = new Error("Error");
-    error.stack = "any_stack";
-    const emailValidatorSpy = jest
-      .spyOn(emailValidator, "isValid")
-      .mockImplementationOnce(() => {
-        throw error;
-      });
-    const spyLoggerError = jest.spyOn(logger, "error");
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse.statusCode).toBe(500);
-    expect(httpResponse.body).toEqual({
-      message: "Internal Server Error",
-      stack: error.stack,
-    });
-    expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
   });
   test("Should return 500 if internal server error occurred in AddAcountUseCase", async () => {
     const { sut, logger, useCase } = makeSut();
@@ -167,7 +117,7 @@ describe("SignUp Controller", () => {
     expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
   });
   test("Should return 200 if AddAcountUseCase executed with success", async () => {
-    const { sut, emailValidator, logger, useCase } = makeSut();
+    const { sut, logger, useCase } = makeSut();
     const httpRequest = {
       body: {
         name: "any_name",
@@ -189,14 +139,12 @@ describe("SignUp Controller", () => {
     };
 
     const useCaseSpy = jest.spyOn(useCase, "execute");
-    const emailValidatorSpy = jest.spyOn(emailValidator, "isValid");
 
     const spyLoggerError = jest.spyOn(logger, "error");
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(200);
     expect(httpResponse.body).toEqual(expectedResponse);
     expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
-    expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
     expect(spyLoggerError).not.toHaveBeenCalledWith(new Error("Error"));
   });
 
