@@ -5,7 +5,7 @@ import { LogControllerDecorator } from "../../presentation/controllers/decorator
 import { SignUpController } from "../../presentation/controllers/signup/signup";
 import { Controller } from "../../presentation/protocols/controller";
 import LoggerFactory from "./logger";
-import SignupValidationCompositeFactory from "./validation-composite/signup-validation-composite";
+import SignupValidationCompositeFactory from "./validation-composite/signup/signup-validation-composite";
 
 export default (): Controller => {
   const encrypter = new BCryptAdapter();
