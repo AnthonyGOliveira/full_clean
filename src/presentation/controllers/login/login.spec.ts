@@ -7,6 +7,7 @@ import { InvalidParam } from "../../errors/invalid-param-error";
 import { MissingParam } from "../../errors/missing-param-error";
 import { Unauthorized } from "../../errors/unauthorized-error";
 import { badRequest, unauthorizedRequest } from "../../helpers/http-helpers";
+import { Validation } from "../../helpers/validators/validation";
 import { EmailValidator } from "../../protocols/email-validator";
 import { LoginController } from "./login";
 
@@ -14,7 +15,18 @@ interface typeSut {
   sut: LoginController;
   useCase: AuthenticationUseCase;
   emailValidator: EmailValidator;
+  validation: Validation;
 }
+
+const makeValidationStub = (): Validation => {
+  class ValidationStub implements Validation {
+    validate(input: any): Error {
+      return null;
+    }
+  }
+
+  return new ValidationStub()
+};
 
 const makeEmailValdiatorStub = (): EmailValidator => {
   class EmailValidatorStub implements EmailValidator {
@@ -43,11 +55,13 @@ const makeUseCaseStub = (): AuthenticationUseCase => {
 const makeSut = (): typeSut => {
   const useCaseStub = makeUseCaseStub();
   const emailValidator = makeEmailValdiatorStub();
-  const loginController = new LoginController(useCaseStub, emailValidator);
+  const validationStub = makeValidationStub();
+  const loginController = new LoginController(useCaseStub, emailValidator, validationStub);
   return {
     sut: loginController,
     useCase: useCaseStub,
     emailValidator,
+    validation: validationStub
   };
 };
 
@@ -195,5 +209,17 @@ describe("LoginController", () => {
     expect(httpResponse.statusCode).toBe(200);
     expect(httpResponse.body).toEqual(expectedResponse);
     expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
+  });
+  test("Should validation was called", async () => {
+    const { sut, validation } = makeSut();
+    const httpRequest = {
+      body: {
+        email: "any_email@mail.com",
+        password: "any_password",
+      },
+    };
+    const spyValidation = jest.spyOn(validation, "validate");
+    await sut.handle(httpRequest);
+    expect(spyValidation).toHaveBeenCalled()
   });
 });
