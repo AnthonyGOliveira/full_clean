@@ -222,4 +222,16 @@ describe("LoginController", () => {
     await sut.handle(httpRequest);
     expect(spyValidation).toHaveBeenCalled()
   });
+  test("Should return 400 if validation return an error", async () => {
+    const { sut, validation } = makeSut();
+    const httpRequest = {
+      body: {
+        email: "any_email@mail.com",
+        password: "any_password",
+      },
+    };
+    jest.spyOn(validation, "validate").mockReturnValue(new InvalidParam("email"))
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse).toEqual(badRequest(new InvalidParam("email")));
+  });
 });
