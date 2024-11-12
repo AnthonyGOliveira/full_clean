@@ -11,19 +11,24 @@ import { AuthenticationUseCase } from "../../../domain/usecases/authentication-u
 import { EmailValidator } from "../../protocols/email-validator";
 import { InvalidParam } from "../../errors/invalid-param-error";
 import { Unauthorized } from "../../errors/unauthorized-error";
+import { Validation } from "../../helpers/validators/validation";
 
 export class LoginController implements Controller {
   private readonly authenticationUseCase: AuthenticationUseCase;
   private readonly emailValidator: EmailValidator;
+  private readonly validation: Validation;
   constructor(
     authenticationUseCase: AuthenticationUseCase,
-    emailValidator: EmailValidator
+    emailValidator: EmailValidator,
+    validation: Validation
   ) {
     this.authenticationUseCase = authenticationUseCase;
     this.emailValidator = emailValidator;
+    this.validation = validation;
   }
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
+      const validationError = this.validation.validate(httpRequest.body);
       const validateFields = ["email", "password"];
       for (const field of validateFields) {
         if (!httpRequest.body[field]) {
