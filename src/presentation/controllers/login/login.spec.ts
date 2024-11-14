@@ -1,5 +1,5 @@
 import {
-  FindAccount,
+  LoginModel,
   AuthenticationUseCase,
   AuthResponse,
 } from "../../../domain/usecases/authentication-use-case";
@@ -44,7 +44,7 @@ const makeUseCaseStub = (): AuthenticationUseCase => {
     expiresIn: 3600,
   };
   class AuthenticationUseCaseStub implements AuthenticationUseCase {
-    execute(addAcount: FindAccount): Promise<AuthResponse | null> {
+    execute(addAcount: LoginModel): Promise<AuthResponse | null> {
       return new Promise((resolve) => resolve(authResponseMock));
     }
   }
@@ -99,7 +99,7 @@ describe("LoginController", () => {
       .spyOn(useCase, "execute")
       .mockImplementationOnce(() => null);
 
-    const expectedCall: FindAccount = {
+    const expectedCall: LoginModel = {
       email: httpRequest.body.email,
       password: httpRequest.body.password,
     };
@@ -125,7 +125,7 @@ describe("LoginController", () => {
         throw error;
       });
 
-    const expectedCall: FindAccount = {
+    const expectedCall: LoginModel = {
       email: httpRequest.body.email,
       password: httpRequest.body.password,
     };
@@ -195,7 +195,7 @@ describe("LoginController", () => {
 
     const useCaseSpy = jest.spyOn(useCase, "execute");
 
-    const expectedCall: FindAccount = {
+    const expectedCall: LoginModel = {
       email: httpRequest.body.email,
       password: httpRequest.body.password,
     };

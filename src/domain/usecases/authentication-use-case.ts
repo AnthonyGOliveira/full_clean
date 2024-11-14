@@ -3,11 +3,11 @@ export interface AuthResponse {
   expiresIn: number;
 }
 
-export interface FindAccount {
+export interface LoginModel {
   email: string;
   password: string;
 }
 
 export interface AuthenticationUseCase {
-  execute(addAcount: FindAccount): Promise<AuthResponse | null>;
+  execute(addAcount: LoginModel): Promise<AuthResponse | null>;
 }
