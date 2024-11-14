@@ -44,4 +44,14 @@ describe("DbAuthenticationUseCase", () => {
     await sut.execute(login);
     expect(spyRepository).toHaveBeenCalledWith(login.email);
   });
+  test("should DbAuthenticationUseCase return null if not find account", async () => {
+    const { sut, repository } = makeSut();
+    jest.spyOn(repository, "find").mockResolvedValueOnce(null);
+    const login = {
+      email: "any@email.com",
+      password: "any_password",
+    };
+    const result = await sut.execute(login);
+    expect(result).toEqual(null);
+  });
 });
