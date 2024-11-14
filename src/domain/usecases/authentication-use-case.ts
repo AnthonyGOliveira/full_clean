@@ -9,5 +9,5 @@ export interface LoginModel {
 }
 
 export interface AuthenticationUseCase {
-  execute(addAcount: LoginModel): Promise<AuthResponse | null>;
+  execute(loginAccount: LoginModel): Promise<AuthResponse | null>;
 }
