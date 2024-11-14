@@ -1,10 +1,10 @@
-import { AddAcountModel } from "../../domain/models/add-acount-model";
+import { AddAcountModel } from "../../../domain/models/add-acount-model";
 import {
   AddAcount,
   AddAcountUseCase,
-} from "../../domain/usecases/add-acount-use-case";
-import { AddAcountRepository } from "../protocols/add-acount-repository";
-import { Encrypter } from "../protocols/encrypter";
+} from "../../../domain/usecases/add-acount-use-case";
+import { AddAcountRepository } from "../../protocols/add-acount-repository";
+import { Encrypter } from "../../protocols/encrypter";
 
 export class DbAddAcountUseCase implements AddAcountUseCase {
   private readonly encrypter: Encrypter;
