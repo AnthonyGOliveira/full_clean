@@ -1,10 +1,10 @@
-import { Encrypter } from "../protocols/encrypter";
+import { Encrypter } from "../../protocols/encrypter";
 import { DbAddAcountUseCase } from "./db-add-acount-use-case";
 import {
   AddAcount,
   AddAcountRepository,
-} from "../protocols/add-acount-repository";
-import { AddAcountModel } from "../models/add-acount-model";
+} from "../../protocols/add-acount-repository";
+import { AddAcountModel } from "../../models/add-acount-model";
 
 interface TypeSut {
   sut: DbAddAcountUseCase;
