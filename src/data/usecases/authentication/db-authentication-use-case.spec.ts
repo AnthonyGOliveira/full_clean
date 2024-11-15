@@ -1,22 +1,35 @@
+import { AccountTokenModel } from "../../models/account-token-model";
 import { FindAcountModel } from "../../models/find-account-model";
 import { FindAccountByEmailRepository } from "../../protocols/find-account-repository";
 import { PasswordValidator } from "../../protocols/password-validator";
+import { TokenGenerator, TokenResponse } from "../../protocols/token-generator";
 import { DbAuthenticationUseCase } from "./db-authentication-use-case";
 
 interface TypeSut {
   sut: DbAuthenticationUseCase;
   repository: FindAccountByEmailRepository;
   passwordValidator: PasswordValidator;
+  tokenGenerator: TokenGenerator;
 }
+
+const makeTokenGeneratorStub = (): TokenGenerator => {
+  class TokenGeneratorStub implements TokenGenerator {
+    generate(account: AccountTokenModel): TokenResponse {
+      return null;
+    }
+  }
+
+  return new TokenGeneratorStub();
+};
 
 const makeFindAccountByEmailRepositoryStub =
   (): FindAccountByEmailRepository => {
     const accountModel: FindAcountModel = {
-        id: "123",
-        name: "any_name",
-        email: "any@email.com",
-        password: "any_hash"
-    }
+      id: "123",
+      name: "any_name",
+      email: "any@email.com",
+      password: "any_hash",
+    };
     class FindAccountByEmailRepositoryStub
       implements FindAccountByEmailRepository
     {
@@ -41,14 +54,17 @@ const makePasswordValidatorStub = (): PasswordValidator => {
 const makeSut = (): TypeSut => {
   const findAccountRepository = makeFindAccountByEmailRepositoryStub();
   const passwordValidatorStub = makePasswordValidatorStub();
+  const tokenGeneratorStub = makeTokenGeneratorStub();
   const sut = new DbAuthenticationUseCase(
     findAccountRepository,
-    passwordValidatorStub
+    passwordValidatorStub,
+    tokenGeneratorStub
   );
   return {
     sut,
     repository: findAccountRepository,
     passwordValidator: passwordValidatorStub,
+    tokenGenerator: tokenGeneratorStub,
   };
 };
 
@@ -87,5 +103,22 @@ describe("DbAuthenticationUseCase", () => {
     const expectHash = "any_hash";
     await sut.execute(login);
     expect(spyRepository).toHaveBeenCalledWith(login.password, expectHash);
+  });
+  test("should DbAuthenticationUseCase call TokenGenerator", async () => {
+    const { sut, tokenGenerator } = makeSut();
+    const spyTokenGenerator = jest.spyOn(tokenGenerator, "generate");
+    const login = {
+      email: "any@email.com",
+      password: "any_password",
+    };
+
+    const accountModel: FindAcountModel = {
+      id: "123",
+      name: "any_name",
+      email: "any@email.com",
+      password: "any_hash",
+    };
+    await sut.execute(login);
+    expect(spyTokenGenerator).toHaveBeenCalledWith(accountModel);
   });
 });
