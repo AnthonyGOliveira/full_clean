@@ -38,6 +38,6 @@ export class DbAuthenticationUseCase implements AuthenticationUseCase {
       return null;
     }
 
-    this.tokenGenerator.generate(account);
+    return this.tokenGenerator.generate(account) as AuthResponse;
   }
 }
