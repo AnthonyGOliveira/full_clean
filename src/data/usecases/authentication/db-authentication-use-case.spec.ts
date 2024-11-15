@@ -121,4 +121,14 @@ describe("DbAuthenticationUseCase", () => {
     await sut.execute(login);
     expect(spyTokenGenerator).toHaveBeenCalledWith(accountModel);
   });
+  test("should throws error in DbAuthenticationUseCase call", async () => {
+    const { sut, repository } = makeSut();
+    jest.spyOn(repository, "find").mockRejectedValueOnce(new Error())
+    const login = {
+      email: "any@email.com",
+      password: "any_password",
+    };
+    const promise = sut.execute(login);
+    await expect(promise).rejects.toThrow();
+  })
 });
