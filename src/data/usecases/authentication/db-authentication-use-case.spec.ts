@@ -13,9 +13,13 @@ interface TypeSut {
 }
 
 const makeTokenGeneratorStub = (): TokenGenerator => {
+  const token: TokenResponse = {
+    accessToken: "any_access_token",
+    expiresIn: 900000,
+  };
   class TokenGeneratorStub implements TokenGenerator {
     generate(account: AccountTokenModel): TokenResponse {
-      return null;
+      return token;
     }
   }
 
@@ -123,12 +127,25 @@ describe("DbAuthenticationUseCase", () => {
   });
   test("should throws error in DbAuthenticationUseCase call", async () => {
     const { sut, repository } = makeSut();
-    jest.spyOn(repository, "find").mockRejectedValueOnce(new Error())
+    jest.spyOn(repository, "find").mockRejectedValueOnce(new Error());
     const login = {
       email: "any@email.com",
       password: "any_password",
     };
     const promise = sut.execute(login);
     await expect(promise).rejects.toThrow();
-  })
+  });
+  test("should return AuthResponse if DbAuthenticationUseCase called", async () => {
+    const { sut } = makeSut();
+    const login = {
+      email: "any@email.com",
+      password: "any_password",
+    };
+    const expectedResult = {
+      accessToken: "any_access_token",
+      expiresIn: 900000,
+    };
+    const result = await sut.execute(login);
+    expect(result).toEqual(expectedResult);
+  });
 });
