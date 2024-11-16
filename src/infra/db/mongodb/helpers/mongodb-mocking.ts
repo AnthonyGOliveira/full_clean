@@ -28,7 +28,16 @@ export const MongoMock = () => {
             return { insertedId: id };
           }),
           findOne: jest.fn().mockImplementation((query) => {
-            return db.collections[name].find((item) => item._id === query._id);
+            if (query._id) {
+              return db.collections[name].find(
+                (item) => item._id === query._id
+              );
+            } else if (query.email) {
+              return db.collections[name].find(
+                (item) => item.email === query.email
+              );
+            }
+            return null;
           }),
           deleteMany: jest.fn().mockImplementation(() => {
             db.collections[name] = [];
