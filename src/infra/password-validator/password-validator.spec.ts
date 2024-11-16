@@ -20,4 +20,15 @@ describe("PasswordValidator", () => {
     expect(spyBcrypt).toHaveBeenCalledWith(password, hashed_password);
     expect(result).toBe(true);
   });
+  test("should return false if PasswordValidator called with incorrect values", async () => {
+    const { sut } = makeSut();
+    const spyBcrypt = jest
+      .spyOn(bcrypt, "compare")
+      .mockImplementation(() => false);
+    const password = "any_password";
+    const hashed_password = "hashed_password";
+    const result = await sut.compare(password, hashed_password);
+    expect(spyBcrypt).toHaveBeenCalledWith(password, hashed_password);
+    expect(result).toBe(false);
+  });
 });
