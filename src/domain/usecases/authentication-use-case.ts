@@ -1,6 +1,6 @@
 export interface AuthResponse {
   accessToken: string;
-  expiresIn: number;
+  expiresIn: string;
 }
 
 export interface LoginModel {
