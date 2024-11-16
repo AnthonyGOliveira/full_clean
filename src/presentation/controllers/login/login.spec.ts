@@ -41,7 +41,7 @@ const makeEmailValdiatorStub = (): EmailValidator => {
 const makeUseCaseStub = (): AuthenticationUseCase => {
   const authResponseMock: AuthResponse = {
     accessToken: "any_access_token",
-    expiresIn: 3600,
+    expiresIn: "3600",
   };
   class AuthenticationUseCaseStub implements AuthenticationUseCase {
     execute(addAcount: LoginModel): Promise<AuthResponse | null> {
@@ -202,7 +202,7 @@ describe("LoginController", () => {
 
     const expectedResponse: AuthResponse = {
       accessToken: "any_access_token",
-      expiresIn: 3600,
+      expiresIn: "3600",
     };
 
     const httpResponse = await sut.handle(httpRequest);
