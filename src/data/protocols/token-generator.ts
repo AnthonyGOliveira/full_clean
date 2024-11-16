@@ -1,7 +1,7 @@
 import { AccountTokenModel } from "../models/account-token-model";
 export interface TokenResponse {
     accessToken: string
-    expiresIn
+    expiresIn: string
 }
 
 export interface TokenGenerator {
