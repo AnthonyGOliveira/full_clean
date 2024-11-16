@@ -38,4 +38,16 @@ describe("JwtTokenGenerator", () => {
       expiresIn: "15m",
     });
   });
+  test("should throw an error if method on JwtTokenGenerator generate error", () => {
+    const { sut } = makeSut();
+    const account = {
+      id: "any_id",
+      name: "any_name",
+      email: "any_email@email.com",
+    };
+    jest.spyOn(jwt, "sign").mockImplementation(() => {
+      throw new Error();
+    });
+    expect(() => sut.generate(account)).toThrow();
+  });
 });
