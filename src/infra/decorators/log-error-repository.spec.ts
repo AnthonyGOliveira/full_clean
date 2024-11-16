@@ -80,9 +80,23 @@ describe("LogErrorRepositoryDecorator", () => {
     await sut.error(error, meta);
     expect(decoratorSpy).toHaveBeenCalledWith(error, meta);
     expect(loggerSpy).toHaveBeenCalledWith(error, meta);
-    expect(MongoDatabaseHelper.getCollection).toHaveBeenCalledWith(
-      "log-error"
-    );
+    expect(MongoDatabaseHelper.getCollection).toHaveBeenCalledWith("log-error");
     expect(insertOneMock).toHaveBeenCalledWith(errorLog);
+  });
+  test("should call warning method", () => {
+    const { sut, logger } = makeSut();
+    const loggerSpy = jest.spyOn(logger, "warning");
+    const meta = { any: "any_value" };
+    const message = "message_warning";
+    sut.warning(message, meta);
+    expect(loggerSpy).toHaveBeenCalledWith(message, meta);
+  });
+  test("should call debug method", () => {
+    const { sut, logger } = makeSut();
+    const loggerSpy = jest.spyOn(logger, "debug");
+    const meta = { any: "any_value" };
+    const message = "message_debug";
+    sut.debug(message, meta);
+    expect(loggerSpy).toHaveBeenCalledWith(message, meta);
   });
 });
