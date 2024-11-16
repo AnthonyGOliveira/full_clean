@@ -3,6 +3,7 @@ import {
   AuthResponse,
   LoginModel,
 } from "../../../domain/usecases/authentication-use-case";
+import { mapperToAuthResponse } from "../../mapper/auth-response-mapper";
 import { FindAccountByEmailRepository } from "../../protocols/find-account-repository";
 import { PasswordValidator } from "../../protocols/password-validator";
 import { TokenGenerator } from "../../protocols/token-generator";
@@ -38,6 +39,7 @@ export class DbAuthenticationUseCase implements AuthenticationUseCase {
       return null;
     }
 
-    return this.tokenGenerator.generate(account) as AuthResponse;
+    const token = this.tokenGenerator.generate(account);
+    return mapperToAuthResponse(token);
   }
 }
