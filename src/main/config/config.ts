@@ -10,4 +10,8 @@ export const config = {
     filenamePath: process.env.LOGGER_FILENAME_PATH || "logs/app.log",
     level: process.env.LOGGER_LEVEL || "info",
   },
+  token: {
+    secret: process.env.SECRET_KEY_TOKEN_JWT || "SECRET_KEY",
+    timeToExpire: process.env.TIME_EXPIRE_TOKEN_JWT || "15m",
+  },
 };
