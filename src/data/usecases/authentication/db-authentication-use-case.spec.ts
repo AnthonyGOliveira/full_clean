@@ -15,7 +15,7 @@ interface TypeSut {
 const makeTokenGeneratorStub = (): TokenGenerator => {
   const token: TokenResponse = {
     accessToken: "any_access_token",
-    expiresIn: 900000,
+    expiresIn: "15m",
   };
   class TokenGeneratorStub implements TokenGenerator {
     generate(account: AccountTokenModel): TokenResponse {
@@ -157,7 +157,7 @@ describe("DbAuthenticationUseCase", () => {
     };
     const expectedResult = {
       accessToken: "any_access_token",
-      expiresIn: 900000,
+      expiresIn: "15m",
     };
     const result = await sut.execute(login);
     expect(result).toEqual(expectedResult);
