@@ -15,7 +15,6 @@ import { Validation } from "../../helpers/validators/validation";
 
 export class LoginController implements Controller {
   private readonly authenticationUseCase: AuthenticationUseCase;
-  private readonly emailValidator: EmailValidator;
   private readonly validation: Validation;
   constructor(
     authenticationUseCase: AuthenticationUseCase,
@@ -23,7 +22,6 @@ export class LoginController implements Controller {
     validation: Validation
   ) {
     this.authenticationUseCase = authenticationUseCase;
-    this.emailValidator = emailValidator;
     this.validation = validation;
   }
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
@@ -32,17 +30,7 @@ export class LoginController implements Controller {
       if (validationError) {
         return badRequest(validationError);
       }
-      const validateFields = ["email", "password"];
-      for (const field of validateFields) {
-        if (!httpRequest.body[field]) {
-          return badRequest(new MissingParam(field));
-        }
-      }
       const { email, password } = httpRequest.body;
-
-      if (!this.emailValidator.isValid(email)) {
-        return badRequest(new InvalidParam("email or password"));
-      }
       const result = await this.authenticationUseCase.execute({
         email,
         password,
