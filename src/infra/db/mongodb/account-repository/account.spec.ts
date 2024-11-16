@@ -39,7 +39,6 @@ describe("AccountMongoRepository", () => {
     expect(addAcountModel.id).toBeTruthy();
     expect(addAcountModel.name).toBe(addAcount.name);
     expect(addAcountModel.email).toBe(addAcount.email);
-    expect(addAcountModel.password).toBe(addAcount.password);
   });
   test("should throw an error if add throws", async () => {
     const { sut } = makeSut();

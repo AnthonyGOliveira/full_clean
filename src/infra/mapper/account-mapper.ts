@@ -7,6 +7,7 @@ export const mapperToAccontModel = (
 ): AddAcountModel => {
   return {
     id,
-    ...addAcount,
+    name: addAcount.name,
+    email: addAcount.email
   };
 };

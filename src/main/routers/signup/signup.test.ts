@@ -36,7 +36,6 @@ describe("Signup Router", () => {
     const result = await request(app).post("/api/signup").send(bodyRequest);
     expect(result.status).toBe(200);
     expect(result.body.id).toBeTruthy();
-    expect(result.body.password).toBeTruthy();
     expect(result.body.name).toBe(bodyRequest.name);
     expect(result.body.email).toBe(bodyRequest.email);
   });

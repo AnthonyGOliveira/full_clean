@@ -48,7 +48,6 @@ const makeSut = (): makeSutInterface => {
           id: "valid_id",
           name: addAcount.name,
           email: addAcount.email,
-          password: addAcount.password,
         })
       );
     }
@@ -80,7 +79,6 @@ describe("SignUp Controller", () => {
       id: "valid_id",
       name: "any_name",
       email: "any_email",
-      password: "any_password",
     };
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse.statusCode).toBe(200);
@@ -135,7 +133,6 @@ describe("SignUp Controller", () => {
       id: "valid_id",
       name: "any_name",
       email: "any_email",
-      password: "any_password",
     };
 
     const useCaseSpy = jest.spyOn(useCase, "execute");
