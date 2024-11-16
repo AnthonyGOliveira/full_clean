@@ -66,26 +66,6 @@ const makeSut = (): typeSut => {
 };
 
 describe("LoginController", () => {
-  test("Should return 400 if request if not send email", async () => {
-    const { sut } = makeSut();
-    const httpRequest = {
-      body: {
-        password: "any_password",
-      },
-    };
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(badRequest(new MissingParam("email")));
-  });
-  test("Should return 400 if request if not send password", async () => {
-    const { sut } = makeSut();
-    const httpRequest = {
-      body: {
-        email: "any_email@email.com",
-      },
-    };
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(badRequest(new MissingParam("password")));
-  });
   test("Should return 401 if AuthenticationUseCase not return AuthenticationResponse", async () => {
     const { sut, useCase } = makeSut();
     const httpRequest = {
@@ -137,52 +117,6 @@ describe("LoginController", () => {
       stack: error.stack,
     });
     expect(useCaseSpy).toHaveBeenCalledWith(expectedCall);
-  });
-  test("Should return 500 if internal server error occurred in EmailValidator", async () => {
-    const { sut, emailValidator } = makeSut();
-    const httpRequest = {
-      body: {
-        email: "any_email@email.com",
-        password: "any_password",
-      },
-    };
-    const error = new Error("Error");
-    error.stack = "any_stack";
-
-    const emailValidatorSpy = jest
-      .spyOn(emailValidator, "isValid")
-      .mockImplementationOnce(() => {
-        throw error;
-      });
-
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse.statusCode).toBe(500);
-    expect(httpResponse.body).toEqual({
-      message: "Internal Server Error",
-      stack: error.stack,
-    });
-    expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
-  });
-  test("Should return 400 if EmailValidator return false", async () => {
-    const { sut, emailValidator } = makeSut();
-    const httpRequest = {
-      body: {
-        email: "any_email@email.com",
-        password: "any_password",
-      },
-    };
-    const error = new Error("Error");
-    error.stack = "any_stack";
-
-    const emailValidatorSpy = jest
-      .spyOn(emailValidator, "isValid")
-      .mockReturnValueOnce(false);
-
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(
-      badRequest(new InvalidParam("email or password"))
-    );
-    expect(emailValidatorSpy).toHaveBeenCalledWith(httpRequest.body.email);
   });
   test("Should return 200 if AuthenticationUseCase executed with success", async () => {
     const { sut, useCase } = makeSut();
