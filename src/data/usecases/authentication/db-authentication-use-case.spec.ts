@@ -108,6 +108,20 @@ describe("DbAuthenticationUseCase", () => {
     await sut.execute(login);
     expect(spyRepository).toHaveBeenCalledWith(login.password, expectHash);
   });
+  test("should DbAuthenticationUseCase call PasswordValidator and return null", async () => {
+    const { sut, passwordValidator } = makeSut();
+    const spyRepository = jest
+      .spyOn(passwordValidator, "compare")
+      .mockResolvedValueOnce(null);
+    const login = {
+      email: "any@email.com",
+      password: "any_password",
+    };
+    const expectHash = "any_hash";
+    const result = await sut.execute(login);
+    expect(spyRepository).toHaveBeenCalledWith(login.password, expectHash);
+    expect(result).toBe(null);
+  });
   test("should DbAuthenticationUseCase call TokenGenerator", async () => {
     const { sut, tokenGenerator } = makeSut();
     const spyTokenGenerator = jest.spyOn(tokenGenerator, "generate");
