@@ -1,7 +1,7 @@
 import request from "supertest";
-import app from "../config/app";
-import { MongoDatabaseHelper } from "../../infra/db/mongodb/helpers/mongodb-helper";
-import { MongoMock } from "../../infra/db/mongodb/helpers/mongodb-mocking";
+import app from "../../config/app";
+import { MongoDatabaseHelper } from "../../../infra/db/mongodb/helpers/mongodb-helper";
+import { MongoMock } from "../../../infra/db/mongodb/helpers/mongodb-mocking";
 
 jest.mock("mongodb", () => {
   return {
