@@ -8,9 +8,11 @@
     "experimentalDecorators": true
   },
   "include": [
-    "src/**/*.ts"
+    "src"
   ], // Ajuste para o seu caminho de código-fonte
   "exclude": [
     "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts"
   ]
 }
