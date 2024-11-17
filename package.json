@@ -4,7 +4,9 @@
   "description": "",
   "main": "jest.config.js",
   "scripts": {
-    "start": "sucrase-node ./src/main/server.ts",
+    "dev": "sucrase-node ./src/main/server.ts",
+    "start": "node ./dist/main/server.js",
+    "build": "tsc",
     "test": "jest --passWithNoTests --runInBand",
     "test:unit": "npm test -- --watch c jest-unit-config.js",
     "test:integration": "npm test -- --watch c jest-integration-config.js",
@@ -22,6 +24,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/mongodb": "^4.0.7",
     "@types/node": "^22.5.5",
+    "@types/supertest": "^6.0.2",
     "@types/validator": "^13.12.2",
     "@types/winston": "^2.4.4",
     "eslint": "^8.57.1",
