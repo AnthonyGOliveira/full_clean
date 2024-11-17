@@ -1,7 +1,8 @@
 import request from "supertest";
-import app from "../../config/app";
-import { MongoDatabaseHelper } from "../../../infra/db/mongodb/helpers/mongodb-helper";
-import { MongoMock } from "../../../infra/db/mongodb/helpers/mongodb-mocking";
+import app from "../../../config/app";
+import { MongoDatabaseHelper } from "../../../../infra/db/mongodb/helpers/mongodb-helper";
+import { MongoMock } from "../../../../infra/db/mongodb/helpers/mongodb-mocking";
+import { config } from "../../../config/config";
 
 jest.mock("mongodb", () => {
   return {
@@ -9,9 +10,9 @@ jest.mock("mongodb", () => {
   };
 });
 
-describe("Signup Router", () => {
+describe("POST ;signup", () => {
   beforeAll(async () => {
-    await MongoDatabaseHelper.connect(process.env.MONGO_URL);
+    await MongoDatabaseHelper.connect(config.database.url);
   });
   afterEach(async () => {
     const accountCollection = await MongoDatabaseHelper.getCollection(

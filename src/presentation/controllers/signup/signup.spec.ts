@@ -3,7 +3,6 @@ import {
   AddAcount,
   AddAcountUseCase,
 } from "../../../domain/usecases/add-acount-use-case";
-import { InvalidParam } from "../../errors/invalid-param-error";
 import { MissingParam } from "../../errors/missing-param-error";
 import { badRequest } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";

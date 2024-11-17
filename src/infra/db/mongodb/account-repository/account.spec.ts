@@ -1,6 +1,7 @@
 import { MongoMock } from "../helpers/mongodb-mocking";
 import { MongoDatabaseHelper } from "../helpers/mongodb-helper";
 import { AccountMongoRepository } from "./account";
+import { config } from "../../../../main/config/config";
 
 jest.mock("mongodb", () => {
   return {
@@ -10,7 +11,7 @@ jest.mock("mongodb", () => {
 
 describe("AccountMongoRepository", () => {
   beforeAll(async () => {
-    await MongoDatabaseHelper.connect(process.env.MONGO_URL);
+    await MongoDatabaseHelper.connect(config.database.url);
   });
   afterEach(async () => {
     const accountCollection = await MongoDatabaseHelper.getCollection(

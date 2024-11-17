@@ -1,7 +1,8 @@
 import request from "supertest";
-import app from "../../config/app";
-import { MongoDatabaseHelper } from "../../../infra/db/mongodb/helpers/mongodb-helper";
-import { MongoMock } from "../../../infra/db/mongodb/helpers/mongodb-mocking";
+import app from "../../../config/app";
+import { MongoDatabaseHelper } from "../../../../infra/db/mongodb/helpers/mongodb-helper";
+import { MongoMock } from "../../../../infra/db/mongodb/helpers/mongodb-mocking";
+import { config } from "../../../config/config";
 
 const account = {
   name: "any_name",
@@ -15,9 +16,9 @@ jest.mock("mongodb", () => {
   };
 });
 
-describe("Login Router", () => {
+describe("POST /login", () => {
   beforeAll(async () => {
-    await MongoDatabaseHelper.connect(process.env.MONGO_URL);
+    await MongoDatabaseHelper.connect(config.database.url);
     const bodyRequest = {
       name: "any_name",
       email: "any_email@mail.com",
