@@ -5,12 +5,28 @@ import {
   AddAcountRepository,
 } from "../../protocols/add-acount-repository";
 import { AddAcountModel } from "../../models/add-acount-model";
+import { FindAccountByEmailRepository } from "../../protocols/find-account-repository";
+import { FindAcountModel } from "../../models/find-account-model";
 
 interface TypeSut {
   sut: DbAddAcountUseCase;
   encrypted: Encrypter;
   repository: AddAcountRepository;
+  findAccount: FindAccountByEmailRepository;
 }
+
+const makeFindAccountByEmailRepositoryStub =
+  (): FindAccountByEmailRepository => {
+    class FindAccountByEmailRepositoryStub
+      implements FindAccountByEmailRepository
+    {
+      async find(email: string): Promise<FindAcountModel | null> {
+        return new Promise((resolve) => resolve(null));
+      }
+    }
+
+    return new FindAccountByEmailRepositoryStub();
+  };
 
 const makeSut = (): TypeSut => {
   class EncrypterStub implements Encrypter {
@@ -31,16 +47,26 @@ const makeSut = (): TypeSut => {
   }
   const encryptedStub = new EncrypterStub();
   const addAcountRepository = new AddAcountRepositoryStub();
-  const sut = new DbAddAcountUseCase(encryptedStub, addAcountRepository);
+  const findAccountRepository = makeFindAccountByEmailRepositoryStub();
+  const sut = new DbAddAcountUseCase(
+    encryptedStub,
+    addAcountRepository,
+    findAccountRepository
+  );
 
   return {
     sut,
     encrypted: encryptedStub,
     repository: addAcountRepository,
+    findAccount: findAccountRepository,
   };
 };
 
 describe("DbAddAcountUseCase", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
   test("should DbAddAccountUseCase call encrypter", async () => {
     const { sut, encrypted } = makeSut();
     const addAcount = {
@@ -79,12 +105,14 @@ describe("DbAddAcountUseCase", () => {
     };
     const spyEncrypted = jest
       .spyOn(encrypted, "encrypt")
-      .mockReturnValueOnce(
-        new Promise((resolve, reject) => reject(new Error()))
+      .mockImplementation(
+        () => new Promise((resolve, rejects) => rejects(new Error()))
       );
-    const promise = sut.execute(addAcount);
-    expect(spyEncrypted).toHaveBeenCalledWith(addAcount.password);
-    await expect(promise).rejects.toThrow();
+    try {
+      expect(await sut.execute(addAcount)).toThrow();
+    } catch (error) {
+      expect(spyEncrypted).toHaveBeenCalledWith(addAcount.password);
+    }
   });
   test("should DbAddAccountUseCase call AddAcountRepository", async () => {
     const { sut, repository } = makeSut();
@@ -96,5 +124,28 @@ describe("DbAddAcountUseCase", () => {
     const spyRepository = jest.spyOn(repository, "add");
     await sut.execute(addAcount);
     expect(spyRepository).toHaveBeenCalledWith(addAcount);
+  });
+  test("should throws error in DbAddAccountUseCase call and email already exists", async () => {
+    const { sut, findAccount } = makeSut();
+    const addAcount = {
+      name: "valid_name",
+      email: "valid_email@mail.com",
+      password: "valid_password",
+    };
+    const accountModel: FindAcountModel = {
+      id: "123",
+      name: "valid_name",
+      email: "valid_email@mail.com",
+      password: "valid_password",
+    };
+    const spyFindAccount = jest
+      .spyOn(findAccount, "find")
+      .mockResolvedValue(accountModel);
+    try {
+      expect(await sut.execute(addAcount)).toThrow();
+    } catch (error) {
+      expect(spyFindAccount).toHaveBeenCalledWith(addAcount.email);
+      expect(error.message).toBe("Email already registered");
+    }
   });
 });
