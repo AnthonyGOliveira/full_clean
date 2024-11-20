@@ -4,7 +4,8 @@ import {
   AddAcountUseCase,
 } from "../../../domain/usecases/add-acount-use-case";
 import { MissingParam } from "../../errors/missing-param-error";
-import { badRequest } from "../../helpers/http-helpers";
+import { ConflictError } from "../../errors/conflict-error";
+import { badRequest, conflict } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { EmailValidator } from "../../protocols/email-validator";
 import { Logger } from "../../protocols/logger";
@@ -175,5 +176,22 @@ describe("SignUp Controller", () => {
     const httpResponse = await sut.handle(httpRequest);
     expect(validationSpy).toHaveBeenCalledWith(httpRequest.body);
     expect(httpResponse).toEqual(badRequest(error));
+  });
+  test("Should return 409 if usecase return conflict error", async () => {
+    const { sut, useCase } = makeSut();
+    const httpRequest = {
+      body: {
+        name: "any_name",
+        email: "any_email",
+        password: "any_password",
+        confirmationPassword: "any_password",
+      },
+    };
+    const error = new Error("Email already registered");
+    jest
+      .spyOn(useCase, "execute")
+      .mockRejectedValueOnce(error);
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse).toEqual(conflict(new ConflictError("Email already registered")));
   });
 });
