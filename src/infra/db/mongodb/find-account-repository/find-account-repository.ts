@@ -11,6 +11,9 @@ export class FindAccountByEmailMongoRepository
       "accounts"
     );
     const result = await accountCollection.findOne({ email: email });
+    if (!result) {
+      return null;
+    }
     return mapperToFindAccountModel({
       _id: result._id.toString(),
       name: result.name,

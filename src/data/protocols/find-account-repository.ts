@@ -8,5 +8,5 @@ export interface FindAccountRepo {
 }
 
 export interface FindAccountByEmailRepository {
-  find(email: string): Promise<FindAcountModel>;
+  find(email: string): Promise<FindAcountModel | null>;
 }
