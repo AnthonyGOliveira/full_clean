@@ -1,5 +1,11 @@
 import { AddAcountUseCase } from "../../../domain/usecases/add-acount-use-case";
-import { badRequest, ok, serverError } from "../../helpers/http-helpers";
+import { ConflictError } from "../../errors/conflict-error";
+import {
+  badRequest,
+  conflict,
+  ok,
+  serverError,
+} from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { Controller } from "../../protocols/controller";
 import { HttpRequest, HttpResponse } from "../../protocols/http";
@@ -7,10 +13,7 @@ import { HttpRequest, HttpResponse } from "../../protocols/http";
 export class SignUpController implements Controller {
   addAcountUseCase: AddAcountUseCase;
   validation: Validation;
-  constructor(
-    addAcountUseCase: AddAcountUseCase,
-    validation: Validation
-  ) {
+  constructor(addAcountUseCase: AddAcountUseCase, validation: Validation) {
     this.addAcountUseCase = addAcountUseCase;
     this.validation = validation;
   }
@@ -31,6 +34,9 @@ export class SignUpController implements Controller {
 
       return ok(result);
     } catch (error) {
+      if (error.message === "Email already registered") {
+        return conflict(new ConflictError(error.message));
+      }
       return serverError(error);
     }
   }
