@@ -112,7 +112,7 @@ describe("DbAuthenticationUseCase", () => {
     const { sut, passwordValidator } = makeSut();
     const spyRepository = jest
       .spyOn(passwordValidator, "compare")
-      .mockResolvedValueOnce(null);
+      .mockResolvedValueOnce(false);
     const login = {
       email: "any@email.com",
       password: "any_password",
