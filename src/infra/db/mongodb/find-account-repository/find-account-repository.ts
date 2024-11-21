@@ -19,6 +19,7 @@ export class FindAccountByEmailMongoRepository
       name: result.name,
       email: result.email,
       password: result.password,
+      role: result.role,
     });
   }
 }

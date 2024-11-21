@@ -9,5 +9,6 @@ export const mapperToFindAccountModel = (
     name: findAccount.name,
     email: findAccount.email,
     password: findAccount.password,
+    role: findAccount.role,
   };
 };

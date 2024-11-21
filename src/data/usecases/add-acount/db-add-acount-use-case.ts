@@ -3,7 +3,10 @@ import {
   AddAcount,
   AddAcountUseCase,
 } from "../../../domain/usecases/add-acount-use-case";
-import { AddAcountRepository } from "../../protocols/add-acount-repository";
+import {
+  AddAcountRepository,
+  Role,
+} from "../../protocols/add-acount-repository";
 import { Encrypter } from "../../protocols/encrypter";
 import { FindAccountByEmailRepository } from "../../protocols/find-account-repository";
 
@@ -23,13 +26,18 @@ export class DbAddAcountUseCase implements AddAcountUseCase {
   }
 
   async execute(addAcount: AddAcount): Promise<AddAcountModel> {
-    const emailExists = await this.findAccountByEmailRepository.find(addAcount.email);
+    const emailExists = await this.findAccountByEmailRepository.find(
+      addAcount.email
+    );
     if (emailExists) {
       throw new Error("Email already registered");
     }
     const hashedPassword = await this.encrypter.encrypt(addAcount.password);
     const addAcountModel = await this.addAcountRepository.add(
-      Object.assign({}, addAcount, { password: hashedPassword })
+      Object.assign({}, addAcount, {
+        password: hashedPassword,
+        role: Role.USER.toString(),
+      })
     );
     return addAcountModel;
   }

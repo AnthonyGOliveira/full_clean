@@ -9,6 +9,7 @@ import { config } from "../../main/config/config";
 interface JwtPayload {
   sub: string;
   email: string;
+  role: string;
 }
 
 export class JwtTokenGenerator implements TokenGenerator {
@@ -25,6 +26,7 @@ export class JwtTokenGenerator implements TokenGenerator {
     return {
       sub: account.id,
       email: account.email,
+      role: account.role,
     };
   }
   private getOptions() {

@@ -3,4 +3,5 @@ export interface FindAcountModel {
   name: string;
   email: string;
   password: string;
+  role: string;
 }
