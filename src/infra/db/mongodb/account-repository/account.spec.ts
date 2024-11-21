@@ -34,6 +34,7 @@ describe("AccountMongoRepository", () => {
       name: "any_name",
       email: "any_email@email.com",
       password: "hashed_password",
+      role: "user",
     };
     const addAcountModel = await sut.add(addAcount);
     expect(addAcountModel).toBeTruthy();
@@ -53,6 +54,7 @@ describe("AccountMongoRepository", () => {
       name: "any_name",
       email: "any_email@email.com",
       password: "hashed_password",
+      role: "user",
     };
     await expect(sut.add(addAcount)).rejects.toThrow("Database error");
   });

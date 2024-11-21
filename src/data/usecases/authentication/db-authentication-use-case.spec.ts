@@ -33,6 +33,7 @@ const makeFindAccountByEmailRepositoryStub =
       name: "any_name",
       email: "any@email.com",
       password: "any_hash",
+      role: "user"
     };
     class FindAccountByEmailRepositoryStub
       implements FindAccountByEmailRepository
@@ -135,6 +136,7 @@ describe("DbAuthenticationUseCase", () => {
       name: "any_name",
       email: "any@email.com",
       password: "any_hash",
+      role: "user"
     };
     await sut.execute(login);
     expect(spyTokenGenerator).toHaveBeenCalledWith(accountModel);

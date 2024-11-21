@@ -120,6 +120,7 @@ describe("DbAddAcountUseCase", () => {
       name: "valid_name",
       email: "valid_email@mail.com",
       password: "hashed_password",
+      role: "user",
     };
     const spyRepository = jest.spyOn(repository, "add");
     await sut.execute(addAcount);
@@ -137,6 +138,7 @@ describe("DbAddAcountUseCase", () => {
       name: "valid_name",
       email: "valid_email@mail.com",
       password: "valid_password",
+      role: "user"
     };
     const spyFindAccount = jest
       .spyOn(findAccount, "find")

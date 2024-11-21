@@ -18,10 +18,12 @@ describe("JwtTokenGenerator", () => {
       id: "any_id",
       name: "any_name",
       email: "any_email@email.com",
+      role: "user"
     };
     const expectedPayload = {
       sub: "any_id",
       email: "any_email@email.com",
+      role: "user"
     };
     const expecteSecretKey = "SECRET_KEY";
     const expectedOptions = { expiresIn: "15m" };
@@ -44,6 +46,7 @@ describe("JwtTokenGenerator", () => {
       id: "any_id",
       name: "any_name",
       email: "any_email@email.com",
+      role: "user"
     };
     jest.spyOn(jwt, "sign").mockImplementation(() => {
       throw new Error();
