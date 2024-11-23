@@ -18,7 +18,7 @@ interface typeSut {
 
 const makeValidationStub = (): Validation => {
   class ValidationStub implements Validation {
-    validate(input: any): Error {
+    validate(input: any): Error | null {
       return null;
     }
   }
