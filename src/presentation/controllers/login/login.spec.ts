@@ -4,7 +4,6 @@ import {
   AuthResponse,
 } from "../../../domain/usecases/authentication-use-case";
 import { InvalidParam } from "../../errors/invalid-param-error";
-import { MissingParam } from "../../errors/missing-param-error";
 import { Unauthorized } from "../../errors/unauthorized-error";
 import { badRequest, unauthorizedRequest } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
@@ -14,7 +13,6 @@ import { LoginController } from "./login";
 interface typeSut {
   sut: LoginController;
   useCase: AuthenticationUseCase;
-  emailValidator: EmailValidator;
   validation: Validation;
 }
 
@@ -54,13 +52,11 @@ const makeUseCaseStub = (): AuthenticationUseCase => {
 
 const makeSut = (): typeSut => {
   const useCaseStub = makeUseCaseStub();
-  const emailValidator = makeEmailValdiatorStub();
   const validationStub = makeValidationStub();
-  const loginController = new LoginController(useCaseStub, emailValidator, validationStub);
+  const loginController = new LoginController(useCaseStub, validationStub);
   return {
     sut: loginController,
     useCase: useCaseStub,
-    emailValidator,
     validation: validationStub
   };
 };

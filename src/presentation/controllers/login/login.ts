@@ -1,4 +1,3 @@
-import { MissingParam } from "../../errors/missing-param-error";
 import {
   badRequest,
   serverError,
@@ -8,8 +7,6 @@ import {
 import { Controller } from "../../protocols/controller";
 import { HttpRequest, HttpResponse } from "../../protocols/http";
 import { AuthenticationUseCase } from "../../../domain/usecases/authentication-use-case";
-import { EmailValidator } from "../../protocols/email-validator";
-import { InvalidParam } from "../../errors/invalid-param-error";
 import { Unauthorized } from "../../errors/unauthorized-error";
 import { Validation } from "../../helpers/validators/validation";
 
@@ -18,7 +15,6 @@ export class LoginController implements Controller {
   private readonly validation: Validation;
   constructor(
     authenticationUseCase: AuthenticationUseCase,
-    emailValidator: EmailValidator,
     validation: Validation
   ) {
     this.authenticationUseCase = authenticationUseCase;
