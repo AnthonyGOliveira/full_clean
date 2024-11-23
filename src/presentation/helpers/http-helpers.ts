@@ -6,7 +6,7 @@ export const badRequest = (error: Error): HttpResponse => ({
   body: error.message,
 });
 
-export const unauthorizedRequest= (error: Error): HttpResponse => ({
+export const unauthorizedRequest = (error: Error): HttpResponse => ({
   statusCode: 401,
   body: error.message,
 });
@@ -29,5 +29,10 @@ export const ok = (data: any): HttpResponse => ({
 
 export const conflict = (error: Error): HttpResponse => ({
   statusCode: 409,
+  body: error.message,
+});
+
+export const forbidden = (error: Error): HttpResponse => ({
+  statusCode: 403,
   body: error.message,
 });
