@@ -7,4 +7,5 @@ export interface HttpRequest {
   body?: any;
   method?: string;
   url?: string;
+  headers?: any;
 }
