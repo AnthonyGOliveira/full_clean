@@ -1,6 +1,6 @@
 import { HttpRequest } from "../../protocols/http";
 import { AuthenticationMiddleware } from "./authentication";
-import { forbidden, ok } from "../../helpers/http-helpers";
+import { forbidden, ok, serverError } from "../../helpers/http-helpers";
 import { ForbiddenError } from "../../errors/forbidden-error";
 import {
   AuthenticateTokenUseCase,
@@ -55,6 +55,19 @@ describe("AuthenticationMiddleware", () => {
     const spyUsecase = jest.spyOn(usecase, "execute");
     const result = await sut.handle(request);
     expect(spyUsecase).toHaveBeenCalledWith(token);
-    expect(result).toEqual(ok({}));
+    expect(result).toEqual(
+      ok({
+        id: "any_id",
+      })
+    );
+  });
+  test("should return 500 if internal server error occurred in use case", async () => {
+    const { sut, usecase } = makeSut();
+    const error = new Error("any_error");
+    jest.spyOn(usecase, "execute").mockImplementation(() => {
+      throw error;
+    });
+    const result = await sut.handle(request);
+    expect(result).toEqual(serverError(error));
   });
 });
