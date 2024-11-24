@@ -74,4 +74,14 @@ describe("AuthenticateTokenVerifierUseCase", () => {
     );
     expect(result).toBeNull();
   });
+  test("should return corret response if token is valid", () => {
+    const { sut, verifier, logger } = makeSut();
+    const token = "any_token";
+    const verifierSpy = jest.spyOn(verifier, "verify");
+    const loggerSpy = jest.spyOn(logger, "debug");
+    const result = sut.execute(token);
+    expect(verifierSpy).toHaveBeenCalledWith(token);
+    expect(loggerSpy).not.toHaveBeenCalled();
+    expect(result).toEqual({ id: "any_id" });
+  });
 });
