@@ -12,7 +12,8 @@ export class AuthenticationMiddleware implements Middleware {
     try {
       const { headers } = httpRequest;
       const token = this.getTokenFromHeaders(headers);
-      const tokenResponse = this.authenticateTokenUseCase.execute(token);
+      const role = this.getRoleFromBody(httpRequest);
+      const tokenResponse = this.handleUseCaseCall(token, role);
       if (!tokenResponse) {
         return forbidden(new ForbiddenError());
       }
@@ -23,5 +24,19 @@ export class AuthenticationMiddleware implements Middleware {
   }
   private getTokenFromHeaders(headers: any): string {
     return headers.Authorization.split(" ")[1];
+  }
+  private getRoleFromBody(request: HttpRequest): string | null {
+    const body = request?.body;
+    if (body) {
+      const role = body?.role;
+      if (role) {
+        return role;
+      }
+    }
+    return null;
+  }
+  private handleUseCaseCall(token: string, role?: any) {
+    if (role) return this.authenticateTokenUseCase.execute(token, role);
+    return this.authenticateTokenUseCase.execute(token);
   }
 }
