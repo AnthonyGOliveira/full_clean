@@ -25,4 +25,15 @@ describe("JsonWebTokenVerifier", () => {
       expect(error).toBeInstanceOf(Error);
     }
   });
+  test("should return TokenResponse if token is valid", () => {
+    const { sut } = makeSut();
+    const token: string = "any_token";
+    const result = sut.verify(token);
+    expect(jwt.verify).toHaveBeenCalledWith(token, "SECRET_KEY");
+    expect(result).toEqual({
+      id: "any_id",
+      email: "any_email",
+      role: "any_role",
+    });
+  });
 });
