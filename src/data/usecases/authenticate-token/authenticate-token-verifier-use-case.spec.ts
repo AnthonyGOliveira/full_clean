@@ -56,6 +56,13 @@ describe("AuthenticateTokenVerifierUseCase", () => {
     const result = sut.execute(token);
     expect(result).toBeNull();
   });
+  test("should return null if role is not equal to role token", () => {
+    const { sut } = makeSut();
+    const token = "any_token";
+    const role = "another_role";
+    const result = sut.execute(token, role);
+    expect(result).toBeNull();
+  });
   test("should return null verifier dependency throw an error", () => {
     const { sut, verifier, logger } = makeSut();
     const token = "any_token";
