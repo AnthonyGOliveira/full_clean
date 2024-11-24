@@ -50,11 +50,25 @@ describe("AuthenticationMiddleware", () => {
     const result = await sut.handle(request);
     expect(result).toEqual(forbidden(new ForbiddenError()));
   });
-  test("should return 200 forbidden if user is authorized", async () => {
+  test("should return 200 if user is authorized", async () => {
     const { sut, usecase } = makeSut();
     const spyUsecase = jest.spyOn(usecase, "execute");
     const result = await sut.handle(request);
     expect(spyUsecase).toHaveBeenCalledWith(token);
+    expect(result).toEqual(
+      ok({
+        id: "any_id",
+      })
+    );
+  });
+  test("should return 200 if user is authorized and role is correct", async () => {
+    const { sut, usecase } = makeSut();
+    const spyUsecase = jest.spyOn(usecase, "execute");
+    request.body = {
+      role: "any_role",
+    };
+    const result = await sut.handle(request);
+    expect(spyUsecase).toHaveBeenCalledWith(token, "any_role");
     expect(result).toEqual(
       ok({
         id: "any_id",
