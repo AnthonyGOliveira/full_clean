@@ -1,6 +1,6 @@
 import { UpdateAccountUseCase } from "../../../domain/usecases/update-account-use-case";
 import { InvalidRequest } from "../../errors/invalid-request";
-import { badRequest, serverError } from "../../helpers/http-helpers";
+import { badRequest, ok, serverError } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { Controller } from "../../protocols/controller";
 import { HttpRequest, HttpResponse } from "../../protocols/http";
@@ -23,7 +23,7 @@ export class UpdateAccountController implements Controller {
       if (!result) {
         return badRequest(new InvalidRequest());
       }
-      throw new Error();
+      return ok(result);
     } catch (error) {
       return serverError(error);
     }
