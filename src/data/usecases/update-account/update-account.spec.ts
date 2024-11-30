@@ -1,4 +1,5 @@
 import { FindAcountModel } from "../../models/find-account-model";
+import { Encrypter } from "../../protocols/encrypter";
 import { FindAccountByEmailRepository } from "../../protocols/find-account-repository";
 import { PasswordValidator } from "../../protocols/password-validator";
 import { DbUpdateAcountUseCase } from "./update-account";
@@ -7,7 +8,18 @@ interface TypeSut {
   sut: DbUpdateAcountUseCase;
   findAccountRepository: FindAccountByEmailRepository;
   passwordValidator: PasswordValidator;
+  encrypted: Encrypter;
 }
+
+const makeEncrypterStub = () => {
+  class EncrypterStub implements Encrypter {
+    async encrypt(password: string): Promise<string> {
+      return new Promise((resolve) => resolve("hashed_password"));
+    }
+  }
+
+  return new EncrypterStub();
+};
 
 const makeFindAccountByEmailRepositoryStub =
   (): FindAccountByEmailRepository => {
@@ -42,15 +54,18 @@ const makePasswordValidatorStub = (): PasswordValidator => {
 const makeSut = (): TypeSut => {
   const findAccountRepository = makeFindAccountByEmailRepositoryStub();
   const passwordValidatorStub = makePasswordValidatorStub();
+  const encrypted = makeEncrypterStub();
   const sut = new DbUpdateAcountUseCase(
     findAccountRepository,
-    passwordValidatorStub
+    passwordValidatorStub,
+    encrypted
   );
 
   return {
     sut,
     findAccountRepository,
     passwordValidator: passwordValidatorStub,
+    encrypted,
   };
 };
 
@@ -111,7 +126,16 @@ describe("DbUpdateAcountUseCase", () => {
       .mockResolvedValueOnce(false);
     const expectHash = "any_hash";
     const result = await sut.execute(updateAccount);
-    expect(spyRepository).toHaveBeenCalledWith(updateAccount.oldPassword, expectHash);
+    expect(spyRepository).toHaveBeenCalledWith(
+      updateAccount.oldPassword,
+      expectHash
+    );
     expect(result).toBe(null);
+  });
+  test("should DbAuthenticationUseCase call encrypter", async () => {
+    const { sut, encrypted } = makeSut();
+    const spyEncrypted = jest.spyOn(encrypted, "encrypt");
+    await sut.execute(updateAccount);
+    expect(spyEncrypted).toHaveBeenCalledWith(updateAccount.password);
   });
 });
