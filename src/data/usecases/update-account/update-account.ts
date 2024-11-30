@@ -19,10 +19,13 @@ export class DbUpdateAcountUseCase implements UpdateAccountUseCase {
     );
     if (!account) return null;
     if (this.hasPasswordUpdateFields(updateAccount)) {
-      await this.passwordValidator.compare(
+      const passwordIsCorrect = await this.passwordValidator.compare(
         updateAccount.oldPassword,
         account.password
       );
+      if (!passwordIsCorrect) {
+        return null;
+      }
     }
     return null;
   }
