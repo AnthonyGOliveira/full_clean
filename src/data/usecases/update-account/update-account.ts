@@ -3,13 +3,15 @@ import {
   UpdateAccountResponse,
   UpdateAccountUseCase,
 } from "../../../domain/usecases/update-account-use-case";
+import { Encrypter } from "../../protocols/encrypter";
 import { FindAccountByEmailRepository } from "../../protocols/find-account-repository";
 import { PasswordValidator } from "../../protocols/password-validator";
 
 export class DbUpdateAcountUseCase implements UpdateAccountUseCase {
   constructor(
     private readonly findAccountByEmailRepository: FindAccountByEmailRepository,
-    private readonly passwordValidator: PasswordValidator
+    private readonly passwordValidator: PasswordValidator,
+    private readonly encrypter: Encrypter
   ) {}
   async execute(
     updateAccount: UpdateAccount
@@ -26,14 +28,13 @@ export class DbUpdateAcountUseCase implements UpdateAccountUseCase {
       if (!passwordIsCorrect) {
         return null;
       }
+      const hashedPassword = await this.encrypter.encrypt(
+        updateAccount.password
+      );
     }
     return null;
   }
   private hasPasswordUpdateFields(updateAccount: UpdateAccount): boolean {
-    return (
-      !!updateAccount?.oldPassword &&
-      !!updateAccount?.password &&
-      !!updateAccount?.confirmationPassword
-    );
+    return !!updateAccount?.oldPassword && !!updateAccount?.password;
   }
 }
