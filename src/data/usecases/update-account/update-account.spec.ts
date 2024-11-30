@@ -176,4 +176,21 @@ describe("DbUpdateAcountUseCase", () => {
     await sut.execute(updateAccount);
     expect(spyRepository).toHaveBeenCalledWith(accountUpdate);
   });
+  test("should DbAuthenticationUseCase call UpdateAccountRepository without password in entry value", async () => {
+    const { sut, updateAccountRepository } = makeSut();
+    const spyRepository = jest.spyOn(updateAccountRepository, "update");
+    const accountUpdate = {
+      id: "123",
+      name: "any_name",
+      email: "any@email.com",
+      role: Role.USER,
+    };
+    await sut.execute({
+      ...updateAccount,
+      oldPassword: undefined,
+      password: undefined,
+      confirmationPassword: undefined,
+    });
+    expect(spyRepository).toHaveBeenCalledWith(accountUpdate);
+  });
 });
