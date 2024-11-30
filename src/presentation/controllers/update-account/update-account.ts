@@ -1,4 +1,5 @@
 import { UpdateAccountUseCase } from "../../../domain/usecases/update-account-use-case";
+import { InvalidRequest } from "../../errors/invalid-request";
 import { badRequest, serverError } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { Controller } from "../../protocols/controller";
@@ -18,7 +19,10 @@ export class UpdateAccountController implements Controller {
         return badRequest(validationError);
       }
       const updateAccount = this.mapper.toUseCase(httpRequest.body);
-      this.updateAccountUseCase.execute(updateAccount);
+      const result = await this.updateAccountUseCase.execute(updateAccount);
+      if (!result) {
+        return badRequest(new InvalidRequest());
+      }
       throw new Error();
     } catch (error) {
       return serverError(error);
