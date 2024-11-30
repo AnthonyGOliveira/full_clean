@@ -1,11 +1,19 @@
+import {
+  UpdateAccount,
+  UpdateAccountResponse,
+  UpdateAccountUseCase,
+} from "../../../domain/usecases/update-account-use-case";
 import { MissingParam } from "../../errors/missing-param-error";
-import { badRequest } from "../../helpers/http-helpers";
+import { badRequest, serverError } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { UpdateAccountController } from "./update-account";
+import { UpdateAccountUseCaseMapper } from "../mappers/update-account";
 
 type SutType = {
   validation: Validation;
+  useCase: UpdateAccountUseCase;
   sut: UpdateAccountController;
+  mapper: UpdateAccountUseCaseMapper;
 };
 
 const makeValidationCompositeStub = (): Validation => {
@@ -17,26 +25,47 @@ const makeValidationCompositeStub = (): Validation => {
   return new ValidationCompositeStub();
 };
 
+const makeUseCaseStub = (): UpdateAccountUseCase => {
+  class UpdateAccountUseCaseStub implements UpdateAccountUseCase {
+    async execute(
+      updateAccount: Partial<UpdateAccount>
+    ): Promise<UpdateAccountResponse | null> {
+      return new Promise((resolve, reject) =>
+        resolve({
+          message: "Account updated successfully.",
+        })
+      );
+    }
+  }
+
+  return new UpdateAccountUseCaseStub();
+};
+
 const makeSut = (): SutType => {
   const validationStub = makeValidationCompositeStub();
-  const sut = new UpdateAccountController(validationStub);
+  const useCaseStub = makeUseCaseStub();
+  const mapper = new UpdateAccountUseCaseMapper();
+  const sut = new UpdateAccountController(validationStub, useCaseStub, mapper);
   return {
     sut,
     validation: validationStub,
+    useCase: useCaseStub,
+    mapper,
   };
 };
 
 describe("UpdateAccountController", () => {
-    const httpRequest = {
-      body: {
-        role: "any_role",
-        name: "any_name",
-        email: "any_email",
-        old_password: "old_password",
-        password: "any_password",
-        confirmationPassword: "any_password",
-      },
-    };
+  const httpRequest = {
+    body: {
+      id: "any_id",
+      role: "any_role",
+      name: "any_name",
+      email: "any_email",
+      oldPassword: "old_password",
+      password: "any_password",
+      confirmationPassword: "any_password",
+    },
+  };
   test("should return 500 if internal server error occurred in updateAcountController", async () => {
     const { sut } = makeSut();
     const spyController = jest.spyOn(sut, "handle");
@@ -61,5 +90,17 @@ describe("UpdateAccountController", () => {
     const httpResponse = await sut.handle(httpRequest);
     expect(validationSpy).toHaveBeenCalledWith(httpRequest.body);
     expect(httpResponse).toEqual(badRequest(error));
+  });
+  test("should return 500 if internal server error occurred in AddAcountUseCase", async () => {
+    const { sut, useCase, mapper } = makeSut();
+    const error = new Error("Error");
+    error.stack = "any_stack";
+    jest.spyOn(useCase, "execute").mockImplementationOnce(() => {
+      throw error;
+    });
+    const spyMapper = jest.spyOn(mapper, "toUseCase");
+    const httpResponse = await sut.handle(httpRequest);
+    expect(spyMapper).toHaveBeenCalledWith(httpRequest.body);
+    expect(httpResponse).toEqual(serverError(error));
   });
 });
