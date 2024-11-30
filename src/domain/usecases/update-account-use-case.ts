@@ -2,7 +2,7 @@ export interface UpdateAccount {
   role: string;
   name: string;
   email: string;
-  old_password?: string;
+  oldPassword?: string;
   password?: string;
   confirmationPassword?: string;
 }
