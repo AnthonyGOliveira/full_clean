@@ -5,7 +5,7 @@ import {
 } from "../../../domain/usecases/update-account-use-case";
 import { MissingParam } from "../../errors/missing-param-error";
 import { InvalidRequest } from "../../errors/invalid-request";
-import { badRequest, serverError } from "../../helpers/http-helpers";
+import { badRequest, serverError, ok } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { UpdateAccountController } from "./update-account";
 import { UpdateAccountUseCaseMapper } from "../mappers/update-account";
@@ -67,15 +67,6 @@ describe("UpdateAccountController", () => {
       confirmationPassword: "any_password",
     },
   };
-  test("should return 500 if internal server error occurred in updateAcountController", async () => {
-    const { sut } = makeSut();
-    const spyController = jest.spyOn(sut, "handle");
-    const httpResponse = await sut.handle(httpRequest);
-    expect(spyController).toHaveBeenCalledWith(httpRequest);
-    expect(httpResponse.body.message).toEqual("Internal Server Error");
-    expect(httpResponse.body.stack).toBeTruthy();
-    expect(httpResponse.statusCode).toBe(500);
-  });
   test("should call validation when updateAcountController is called", async () => {
     const { sut, validation } = makeSut();
     const validationSpy = jest.spyOn(validation, "validate");
@@ -109,5 +100,18 @@ describe("UpdateAccountController", () => {
     jest.spyOn(useCase, "execute").mockResolvedValueOnce(null);
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse).toEqual(badRequest(new InvalidRequest()));
+  });
+  test("should return 200 if AddAcountUseCase executed with success", async () => {
+    const { sut, useCase } = makeSut();
+    const expectedResponse: UpdateAccountResponse = {
+      message: "Account updated successfully.",
+    };
+
+    const useCaseSpy = jest.spyOn(useCase, "execute");
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse.statusCode).toBe(200);
+    expect(httpResponse.body).toEqual(expectedResponse);
+    expect(useCaseSpy).toHaveBeenCalledWith(httpRequest.body);
+    expect(httpResponse).toEqual(ok(expectedResponse));
   });
 });
