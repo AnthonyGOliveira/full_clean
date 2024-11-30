@@ -193,4 +193,11 @@ describe("DbUpdateAcountUseCase", () => {
     });
     expect(spyRepository).toHaveBeenCalledWith(accountUpdate);
   });
+  test("should DbAuthenticationUseCase return an UpdateAccountResponse", async () => {
+    const { sut } = makeSut();
+    const result = await sut.execute(updateAccount);
+    expect(result).toEqual({
+      message: "Account updated successfully.",
+    });
+  });
 });
