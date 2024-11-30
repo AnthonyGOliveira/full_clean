@@ -3,6 +3,7 @@ import {
   UpdateAccountResponse,
   UpdateAccountUseCase,
 } from "../../../domain/usecases/update-account-use-case";
+import { ACCOUNT_SUCCESSFULL_UPDATED } from "../../constants";
 import { mapperToUpdateAccountRepo } from "../../mapper/update-account-mapper";
 import { FindAcountModel } from "../../models/find-account-model";
 import { UpdateAccountModel } from "../../models/update-account-model";
@@ -27,6 +28,9 @@ export class DbUpdateAcountUseCase implements UpdateAccountUseCase {
     if (!account) return null;
     const result = await this.updateAccount(updateAccount, account);
     if (!result) return null;
+    return {
+      message: ACCOUNT_SUCCESSFULL_UPDATED,
+    };
   }
   private hasPasswordUpdateFields(updateAccount: UpdateAccount): boolean {
     return !!updateAccount?.oldPassword && !!updateAccount?.password;
