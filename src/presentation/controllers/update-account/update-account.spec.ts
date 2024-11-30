@@ -4,6 +4,7 @@ import {
   UpdateAccountUseCase,
 } from "../../../domain/usecases/update-account-use-case";
 import { MissingParam } from "../../errors/missing-param-error";
+import { InvalidRequest } from "../../errors/invalid-request";
 import { badRequest, serverError } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { UpdateAccountController } from "./update-account";
@@ -102,5 +103,11 @@ describe("UpdateAccountController", () => {
     const httpResponse = await sut.handle(httpRequest);
     expect(spyMapper).toHaveBeenCalledWith(httpRequest.body);
     expect(httpResponse).toEqual(serverError(error));
+  });
+  test("should return 400 if usecase return null", async () => {
+    const { sut, useCase } = makeSut();
+    jest.spyOn(useCase, "execute").mockResolvedValueOnce(null);
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse).toEqual(badRequest(new InvalidRequest()));
   });
 });
