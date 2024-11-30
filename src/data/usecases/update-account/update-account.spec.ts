@@ -3,12 +3,19 @@ import { Encrypter } from "../../protocols/encrypter";
 import { FindAccountByEmailRepository } from "../../protocols/find-account-repository";
 import { PasswordValidator } from "../../protocols/password-validator";
 import { DbUpdateAcountUseCase } from "./update-account";
+import {
+  UpdateAccount,
+  UpdateAccountRepository,
+} from "../../protocols/update-account-repository";
+import { UpdateAccountModel } from "../../models/update-account-model";
+import { Role } from "../../models/role-model";
 
 interface TypeSut {
   sut: DbUpdateAcountUseCase;
   findAccountRepository: FindAccountByEmailRepository;
   passwordValidator: PasswordValidator;
   encrypted: Encrypter;
+  updateAccountRepository: UpdateAccountRepository;
 }
 
 const makeEncrypterStub = () => {
@@ -19,6 +26,21 @@ const makeEncrypterStub = () => {
   }
 
   return new EncrypterStub();
+};
+
+const makeUpdateAccountRepositoryStub = () => {
+  class UpdateAccountRepositoryStub implements UpdateAccountRepository {
+    async update(updateAccount: UpdateAccount): Promise<UpdateAccountModel> {
+      return {
+        id: "any_id",
+        name: "any_name",
+        email: "any@email.com",
+        role: Role.USER,
+      };
+    }
+  }
+
+  return new UpdateAccountRepositoryStub();
 };
 
 const makeFindAccountByEmailRepositoryStub =
@@ -55,10 +77,12 @@ const makeSut = (): TypeSut => {
   const findAccountRepository = makeFindAccountByEmailRepositoryStub();
   const passwordValidatorStub = makePasswordValidatorStub();
   const encrypted = makeEncrypterStub();
+  const updateAccountRepository = makeUpdateAccountRepositoryStub();
   const sut = new DbUpdateAcountUseCase(
     findAccountRepository,
     passwordValidatorStub,
-    encrypted
+    encrypted,
+    updateAccountRepository
   );
 
   return {
@@ -66,6 +90,7 @@ const makeSut = (): TypeSut => {
     findAccountRepository,
     passwordValidator: passwordValidatorStub,
     encrypted,
+    updateAccountRepository,
   };
 };
 
@@ -75,9 +100,9 @@ describe("DbUpdateAcountUseCase", () => {
   });
   const updateAccount = {
     id: "any_id",
-    role: "any_role",
+    role: "user",
     name: "any_name",
-    email: "any_email",
+    email: "any@email.com",
     oldPassword: "old_password",
     password: "any_password",
     confirmationPassword: "any_password",
@@ -137,5 +162,18 @@ describe("DbUpdateAcountUseCase", () => {
     const spyEncrypted = jest.spyOn(encrypted, "encrypt");
     await sut.execute(updateAccount);
     expect(spyEncrypted).toHaveBeenCalledWith(updateAccount.password);
+  });
+  test("should DbAuthenticationUseCase call UpdateAccountRepository with password in entry value", async () => {
+    const { sut, updateAccountRepository } = makeSut();
+    const spyRepository = jest.spyOn(updateAccountRepository, "update");
+    const accountUpdate = {
+      id: "123",
+      name: "any_name",
+      email: "any@email.com",
+      role: Role.USER,
+      password: "hashed_password",
+    };
+    await sut.execute(updateAccount);
+    expect(spyRepository).toHaveBeenCalledWith(accountUpdate);
   });
 });
