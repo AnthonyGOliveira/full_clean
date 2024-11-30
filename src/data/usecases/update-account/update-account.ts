@@ -12,7 +12,8 @@ export class DbUpdateAcountUseCase implements UpdateAccountUseCase {
   async execute(
     updateAccount: UpdateAccount
   ): Promise<UpdateAccountResponse | null> {
-    this.findAccountByEmailRepository.find(updateAccount.email);
+    const account = this.findAccountByEmailRepository.find(updateAccount.email);
+    if (!account) return null;
     return null;
   }
 }
