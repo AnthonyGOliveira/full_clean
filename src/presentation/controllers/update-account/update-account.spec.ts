@@ -1,3 +1,5 @@
+import { MissingParam } from "../../errors/missing-param-error";
+import { badRequest } from "../../helpers/http-helpers";
 import { Validation } from "../../helpers/validators/validation";
 import { UpdateAccountController } from "./update-account";
 
@@ -25,8 +27,6 @@ const makeSut = (): SutType => {
 };
 
 describe("UpdateAccountController", () => {
-  test("should return 500 if internal server error occurred in updateAcountController", async () => {
-    const { sut } = makeSut();
     const httpRequest = {
       body: {
         role: "any_role",
@@ -37,6 +37,8 @@ describe("UpdateAccountController", () => {
         confirmationPassword: "any_password",
       },
     };
+  test("should return 500 if internal server error occurred in updateAcountController", async () => {
+    const { sut } = makeSut();
     const spyController = jest.spyOn(sut, "handle");
     const httpResponse = await sut.handle(httpRequest);
     expect(spyController).toHaveBeenCalledWith(httpRequest);
@@ -46,18 +48,18 @@ describe("UpdateAccountController", () => {
   });
   test("should call validation when updateAcountController is called", async () => {
     const { sut, validation } = makeSut();
-    const httpRequest = {
-      body: {
-        role: "any_role",
-        name: "any_name",
-        email: "any_email",
-        old_password: "old_password",
-        password: "any_password",
-        confirmationPassword: "any_password",
-      },
-    };
     const validationSpy = jest.spyOn(validation, "validate");
     await sut.handle(httpRequest);
     expect(validationSpy).toHaveBeenCalledWith(httpRequest.body);
+  });
+  test("should return 400 if validation return an error", async () => {
+    const { sut, validation } = makeSut();
+    const error = new MissingParam("any_param");
+    const validationSpy = jest
+      .spyOn(validation, "validate")
+      .mockReturnValueOnce(error);
+    const httpResponse = await sut.handle(httpRequest);
+    expect(validationSpy).toHaveBeenCalledWith(httpRequest.body);
+    expect(httpResponse).toEqual(badRequest(error));
   });
 });
