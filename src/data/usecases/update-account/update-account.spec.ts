@@ -104,4 +104,14 @@ describe("DbUpdateAcountUseCase", () => {
     });
     expect(spyRepository).not.toHaveBeenCalled();
   });
+  test("should DbAuthenticationUseCase call PasswordValidator and return null", async () => {
+    const { sut, passwordValidator } = makeSut();
+    const spyRepository = jest
+      .spyOn(passwordValidator, "compare")
+      .mockResolvedValueOnce(false);
+    const expectHash = "any_hash";
+    const result = await sut.execute(updateAccount);
+    expect(spyRepository).toHaveBeenCalledWith(updateAccount.oldPassword, expectHash);
+    expect(result).toBe(null);
+  });
 });
