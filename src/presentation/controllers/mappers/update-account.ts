@@ -23,7 +23,7 @@ export interface UpdateAccount {
 export class UpdateAccountUseCaseMapper
   implements Mapper<Partial<UpdateAccountEntry>, Partial<UpdateAccount>>
 {
-  toUseCase(data: Partial<UpdateAccountEntry>): Partial<UpdateAccount> {
+  toUseCase(data: UpdateAccountEntry): UpdateAccount {
     return {
       id: data.id,
       role: data.role,

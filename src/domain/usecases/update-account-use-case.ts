@@ -2,9 +2,9 @@ export interface UpdateAccount {
   role: string;
   name: string;
   email: string;
-  old_password: string;
-  password: string;
-  confirmationPassword: string;
+  old_password?: string;
+  password?: string;
+  confirmationPassword?: string;
 }
 
 export interface UpdateAccountResponse {
@@ -13,6 +13,6 @@ export interface UpdateAccountResponse {
 
 export interface UpdateAccountUseCase {
   execute(
-    updateAccount: Partial<UpdateAccount>
+    updateAccount: UpdateAccount
   ): Promise<UpdateAccountResponse | null>;
 }
